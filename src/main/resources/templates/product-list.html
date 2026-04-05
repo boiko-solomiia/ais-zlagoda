@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Products</title>
+</head>
+<body>
+<h2>Products</h2>
+
+<a th:href="@{/product/add}">Add product</a>
+
+<form th:action="@{/product/search}" method="get">
+    <input type="text" name="name" placeholder="Search by name">
+    <button type="submit">Search</button>
+</form>
+<p th:if="${searchName}">
+    Search results for: <b th:text="${searchName}"></b>
+</p>
+
+<p th:if="${products != null and #lists.isEmpty(products)}">
+    No products found.
+</p>
+<ul>
+    <li th:each="product : ${products}">
+        <span th:text="${product.productName}"></span>
+        |
+        <span th:text="${product.manufacturer}"></span>
+        |
+        <span th:text="${product.characteristics}"></span>
+        |
+        category:
+        <span th:text="${product.categoryNumber}"></span>
+
+        <a th:href="@{/product/edit/{id}(id=${product.productId})}">Edit</a>
+
+        <form th:action="@{/product/delete/{id}(id=${product.productId})}" method="post" style="display:inline;">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+</ul>
+</body>
+</html>

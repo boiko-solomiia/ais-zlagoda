@@ -116,16 +116,7 @@ public class CategoryService {
     }
 
     public Response<List<Category>> findAll() {
-        String query = "SELECT * FROM category";
-        return getCategoriesByQuery(query);
-    }
-
-    public Response<List<Category>> getCategoriesSortedByName() {
         String query = "SELECT * FROM category ORDER BY category_name ASC";
-        return getCategoriesByQuery(query);
-    }
-
-    private Response<List<Category>> getCategoriesByQuery(String query) {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             List<Category> categories = new LinkedList<>();
