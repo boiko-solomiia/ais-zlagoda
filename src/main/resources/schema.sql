@@ -14,3 +14,15 @@ CREATE TABLE IF NOT EXISTS product (
     ON DELETE RESTRICT
     ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS store_product (
+    upc VARCHAR(20) PRIMARY KEY,
+    product_id INT NOT NULL,
+    selling_price DECIMAL(10,2) NOT NULL,
+    products_number INT NOT NULL,
+    promotional_product BOOLEAN NOT NULL,
+    CONSTRAINT fk_store_product_product
+    FOREIGN KEY (product_id) REFERENCES product(product_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+);

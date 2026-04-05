@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add store product</title>
+</head>
+<body>
+<h2>Add Store Product</h2>
+
+<form th:action="@{/store-product/add}" method="post" th:object="${storeProduct}">
+    <label>UPC:</label>
+    <input type="text" th:field="*{upc}">
+    <br><br>
+
+    <label>Product:</label>
+    <select th:field="*{productId}">
+        <option value="">-- Select product --</option>
+        <option th:each="p : ${products}"
+                th:value="${p.productId}"
+                th:text="${p.productName}">
+        </option>
+    </select>
+    <br><br>
+
+    <label>Selling price:</label>
+    <input type="number" step="0.01" th:field="*{sellingPrice}">
+    <br><br>
+
+    <label>Products number:</label>
+    <input type="number" th:field="*{productsNumber}">
+    <br><br>
+
+    <label>Promotional product:</label>
+    <input type="checkbox" th:field="*{promotionalProduct}">
+    <br><br>
+
+    <button type="submit">Save</button>
+</form>
+
+<div th:if="${errors}">
+    <p th:each="err : ${errors}" th:text="${err}"></p>
+</div>
+
+<a th:href="@{/store-product}">Back</a>
+</body>
+</html>

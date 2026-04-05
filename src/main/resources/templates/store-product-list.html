@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Store products</title>
+</head>
+<body>
+<h2>Store Products</h2>
+
+<a th:href="@{/store-product/add}">Add store product</a>
+<br><br>
+
+<a th:href="@{/store-product/promotional}">Promotional products</a>
+<br>
+<a th:href="@{/store-product/non-promotional}">Non-promotional products</a>
+
+<form th:action="@{/store-product/search}" method="get">
+    <input type="text" name="upc" placeholder="Search by UPC">
+    <button type="submit">Search</button>
+</form>
+
+<ul>
+    <li th:each="sp : ${storeProducts}">
+        <span th:text="${sp.productName}"></span>
+        |
+        <span th:text="${sp.characteristics}"></span>
+        |
+        price:
+        <span th:text="${sp.sellingPrice}"></span>
+        |
+        quantity:
+        <span th:text="${sp.productsNumber}"></span>
+    </li>
+</ul>
+</body>
+</html>
