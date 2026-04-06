@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Customer cards</title>
+</head>
+<body>
+<h2>Customer Cards</h2>
+
+<a th:href="@{/customer-card/add}">Add customer card</a>
+
+<form th:action="@{/customer-card/search}" method="get">
+    <input type="text" name="surname" placeholder="Search by surname">
+    <button type="submit">Search</button>
+</form>
+
+<p th:if="${searchSurname}">
+    Search results for surname: <b th:text="${searchSurname}"></b>
+</p>
+
+<p th:if="${selectedPercent}">
+    Customer cards with percent: <b th:text="${selectedPercent}"></b>
+</p>
+
+<ul>
+    <li th:each="card : ${customerCards}">
+        <span th:text="${card.cardNumber}"></span>
+        |
+        <span th:text="${card.custSurname}"></span>
+        <span th:text="${card.custName}"></span>
+        <span th:text="${card.custPatronymic}"></span>
+        |
+        <span th:text="${card.phoneNumber}"></span>
+        |
+        <span th:text="${card.percent}"></span>%
+
+        <a th:href="@{/customer-card/edit/{cardNumber}(cardNumber=${card.cardNumber})}">Edit</a>
+
+        <form th:action="@{/customer-card/delete/{cardNumber}(cardNumber=${card.cardNumber})}" method="post" style="display:inline;">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+</ul>
+</body>
+</html>
