@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class StoreProduct {
     private String upc;
+    private String upcProm;
     private Integer productId;
     private Double sellingPrice;
     private Integer productsNumber;

@@ -48,6 +48,7 @@ public class StoreProductService {
     private StoreProduct storeProductFromResultSet(ResultSet resultSet) throws SQLException {
         return new StoreProduct(
                 resultSet.getString("upc"),
+                resultSet.getString("upc_prom"),
                 resultSet.getInt("product_id"),
                 resultSet.getDouble("selling_price"),
                 resultSet.getInt("products_number"),

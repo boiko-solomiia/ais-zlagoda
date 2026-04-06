@@ -6,23 +6,46 @@ CREATE TABLE IF NOT EXISTS category (
 CREATE TABLE IF NOT EXISTS product (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
     category_number INT NOT NULL,
-    product_name VARCHAR(100) NOT NULL,
+    product_name VARCHAR(50) NOT NULL,
     manufacturer VARCHAR(100) NOT NULL,
-    characteristics VARCHAR(255) NOT NULL,
+    characteristics VARCHAR(100) NOT NULL,
     CONSTRAINT fk_product_category
     FOREIGN KEY (category_number) REFERENCES category(category_number)
-    ON DELETE RESTRICT
+    ON DELETE NO ACTION
     ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS store_product (
-    upc VARCHAR(20) PRIMARY KEY,
+    upc VARCHAR(12) PRIMARY KEY,
+    upc_prom VARCHAR(12) NULL,
     product_id INT NOT NULL,
-    selling_price DECIMAL(10,2) NOT NULL,
+    selling_price DECIMAL(13,4) NOT NULL,
     products_number INT NOT NULL,
     promotional_product BOOLEAN NOT NULL,
+    FOREIGN KEY (upc_prom)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
     CONSTRAINT fk_store_product_product
     FOREIGN KEY (product_id) REFERENCES product(product_id)
-    ON DELETE RESTRICT
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+
+);
+
+
+CREATE TABLE IF NOT EXISTS check (
+    check_number VARCHAR(10) PRIMARY KEY,
+    id_employee VARCHAR(10) NOT NULL,
+    card_number VARCHAR(13) NULL,
+    print_date DATETIME NOT NULL,
+    sum_total DECIMAL(13,4) NOT NULL,
+    vat DECIMAL(13,4) NOT NULL,
+    CONSTRAINT fk_check_employee
+    FOREIGN KEY (id_employee) REFERENCES employee(id_employee)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+    CONSTRAINT fk_check_customer_card
+    FOREIGN KEY (card_number) REFERENCES customer_card(card_number)
+    ON DELETE NO ACTION
     ON UPDATE CASCADE
 );
