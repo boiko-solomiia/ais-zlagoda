@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS store_product (
 );
 
 
-CREATE TABLE IF NOT EXISTS check (
+CREATE TABLE IF NOT EXISTS my_check (
     check_number VARCHAR(10) PRIMARY KEY,
     id_employee VARCHAR(10) NOT NULL,
     card_number VARCHAR(13) NULL,
@@ -63,4 +63,18 @@ CREATE TABLE IF NOT EXISTS employee (
     city VARCHAR(50) NOT NULL,
     street VARCHAR(50) NOT NULL,
     zip_code VARCHAR(9) NOT NULL
+);
+
+
+
+CREATE TABLE IF NOT EXISTS customer_card (
+    card_number VARCHAR(13) PRIMARY KEY,
+    cust_surname VARCHAR(50) NOT NULL,
+    cust_name VARCHAR(50) NOT NULL,
+    cust_patronymic VARCHAR(50) NULL,
+    phone_number VARCHAR(13) NOT NULL,
+    city VARCHAR(50) NULL,
+    street VARCHAR(50) NULL,
+    zip_code VARCHAR(9) NULL,
+    percent INT NOT NULL
 );
