@@ -25,6 +25,10 @@ public class EmployeeService {
     private List<String> validateEmployee(Employee employee) {
         List<String> errors = new LinkedList<>();
 
+        if (employee.getIdEmployee() == null || employee.getIdEmployee().isBlank()) {
+            errors.add("Employee id can't be empty");
+        }
+
         if (employee.getEmplSurname() == null || employee.getEmplSurname().isBlank()) {
             errors.add("Employee surname can't be empty");
         }
@@ -108,26 +112,7 @@ public class EmployeeService {
         }
     }
 
-    public Response<Employee> deleteEmployee(String employeeId) {
-        if (findEmployeeById(employeeId).getObject() == null) {
-            return new Response<>(null, Collections.singletonList("Can't delete nonexistent employee"));
-        }
-
-        String query = "DELETE FROM employee WHERE id_employee = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, employeeId);
-
-            int rows = statement.executeUpdate();
-            if (rows == 0) {
-                return new Response<>(null, Collections.singletonList("Failed to delete employee"));
-            }
-
-            return new Response<>(null, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
+    m
 
     public Response<Employee> updateEmployee(Employee employee) {
         List<String> errors = validateEmployee(employee);
