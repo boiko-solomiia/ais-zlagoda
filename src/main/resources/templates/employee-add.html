@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Add employee</title>
+</head>
+<body>
+<h2>Add Employee</h2>
+
+<form th:action="@{/employee/add}" method="post" th:object="${employee}">
+
+  <label>Id:</label>
+  <input type="text" th:field="*{idEmployee}">
+  <br><br>
+
+  <label>Surname:</label>
+  <input type="text" th:field="*{emplSurname}">
+  <br><br>
+
+  <label>Name:</label>
+  <input type="text" th:field="*{emplName}">
+  <br><br>
+
+  <label>Patronymic:</label>
+  <input type="text" th:field="*{emplPatronymic}">
+  <br><br>
+
+  <label>Role:</label>
+  <select th:field="*{emplRole}">
+    <option value="">-- Select role --</option>
+    <option value="касир">Касир</option>
+    <option value="адміністратор">Адміністратор</option>
+    <option value="охоронець">Охоронець</option>
+    <option value="прибиральник">Прибиральник</option>
+    <option value="менеджер">Менеджер</option>
+  </select>
+  <br><br>
+
+  <label>Salary:</label>
+  <input type="number" th:field="*{salary}">
+  <br><br>
+
+  <label>Date of Birth:</label>
+  <input type="date" th:field="*{dateOfBirth}">
+  <br><br>
+
+  <label>Date of Start:</label>
+  <input type="date" th:field="*{dateOfStart}">
+  <br><br>
+
+  <label>Phone Number:</label>
+  <input type="tel" th:field="*{phoneNumber}">
+  <br><br>
+
+  <label>City:</label>
+  <input type="text" th:field="*{city}">
+  <br><br>
+
+  <label>Street:</label>
+  <input type="text" th:field="*{street}">
+  <br><br>
+
+  <label>Zip Code:</label>
+  <input type="text" th:field="*{zipCode}">
+  <br><br>
+
+  <button type="submit">Save</button>
+</form>
+
+<div th:if="${errors}">
+  <p th:each="err : ${errors}" th:text="${err}"></p>
+</div>
+
+<a th:href="@{/employee}">Back to employees</a>
+</body>
+</html>

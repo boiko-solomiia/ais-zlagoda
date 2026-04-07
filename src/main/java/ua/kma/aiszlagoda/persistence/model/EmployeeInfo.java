@@ -5,21 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Employee {
-    private String idEmployee;
-    private String emplSurname;
-    private String emplName;
-    private String emplPatronymic;
-    private String emplRole;
-    private Double salary;
-    private LocalDate dateOfBirth;
-    private LocalDate dateOfStart;
+public class EmployeeInfo {
     private String phoneNumber;
     private String city;
     private String street;
