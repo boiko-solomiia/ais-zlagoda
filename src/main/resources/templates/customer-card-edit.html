@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Edit customer card</title>
+</head>
+<body>
+<h2>Edit Customer Card</h2>
+
+<form th:action="@{/customer-card/edit}" method="post" th:object="${customerCard}">
+  <label>Card number:</label>
+  <input type="text" th:field="*{cardNumber}" readonly>
+  <br><br>
+
+  <label>Surname:</label>
+  <input type="text" th:field="*{custSurname}">
+  <br><br>
+
+  <label>Name:</label>
+  <input type="text" th:field="*{custName}">
+  <br><br>
+
+  <label>Patronymic:</label>
+  <input type="text" th:field="*{custPatronymic}">
+  <br><br>
+
+  <label>Phone number:</label>
+  <input type="text" th:field="*{phoneNumber}">
+  <br><br>
+
+  <label>City:</label>
+  <input type="text" th:field="*{city}">
+  <br><br>
+
+  <label>Street:</label>
+  <input type="text" th:field="*{street}">
+  <br><br>
+
+  <label>ZIP code:</label>
+  <input type="text" th:field="*{zipCode}">
+  <br><br>
+
+  <label>Percent:</label>
+  <input type="number" th:field="*{percent}">
+  <br><br>
+
+  <button type="submit">Update</button>
+</form>
+
+<div th:if="${errors}">
+  <p th:each="err : ${errors}" th:text="${err}"></p>
+</div>
+
+<a th:href="@{/customer-card}">Back</a>
+</body>
+</html>
