@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Employees</title>
+</head>
+<body>
+<h2>Employees</h2>
+
+<a th:href="@{/employee/add}">Add employee</a>
+
+<form th:action="@{/employee/search}" method="get">
+  <input type="text" name="surname" placeholder="Search by surname">
+  <button type="submit">Search</button>
+</form>
+
+<p th:if="${searchSurname}">
+  Search results for surname: <b th:text="${searchSurname}"></b>
+</p>
+
+<ul>
+  <li th:each="employee : ${employees}">
+    <span th:text="${employee.idEmployee}"></span>
+    |
+    <span th:text="${employee.emplSurname}"></span>
+    <span th:text="${employee.emplName}"></span>
+    <span th:text="${employee.emplPatronymic}"></span>
+    |
+    <span th:text="${employee.emplRole}"></span>
+    |
+    <span th:text="${employee.salary}"></span>грн
+    |
+    <span th:text="${employee.dateOfBirth}"></span>
+    |
+    <span th:text="${employee.dateOfStart}"></span>
+    |
+    <span th:text="${employee.city}"></span>
+    |
+    <span th:text="${employee.street}"></span>
+    |
+    <span th:text="${employee.zipCode}"></span>
+
+    <a th:href="@{/employee/edit/{idEmployee}(idEmployee=${employee.idEmployee})}">Edit</a>
+
+    <form th:action="@{/employee/delete/{idEmployee}(idEmployee=${employee.idEmployee})}" method="post" style="display:inline;">
+      <button type="submit">Delete</button>
+    </form>
+  </li>
+</ul>
+</body>
+</html>
