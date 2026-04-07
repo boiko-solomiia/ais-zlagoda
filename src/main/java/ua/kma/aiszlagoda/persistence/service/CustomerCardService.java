@@ -35,6 +35,8 @@ public class CustomerCardService {
 
         if (customerCard.getPhoneNumber() == null || customerCard.getPhoneNumber().isBlank()) {
             errors.add("Phone number can't be empty");
+        } else if (customerCard.getPhoneNumber().length() > 13) {
+            errors.add("Phone number can't exceed 13 characters including '+'");
         }
 
         if (customerCard.getPercent() == null) {
