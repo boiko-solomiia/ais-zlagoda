@@ -32,6 +32,8 @@ public class CheckService {
 
         if (myCheck.getPrintDate() == null) {
             errors.add("Print date can't be empty");
+        } else if (myCheck.getPrintDate().isAfter(LocalDateTime.now())) {
+            errors.add("Print date can't be in the future");
         }
 
         return errors;
@@ -49,11 +51,19 @@ public class CheckService {
         );
     }
 
+    private double calculateSumTotal(Check myCheck) {
+        return 0.0;
+    }
+
     public Response<Check> createCheck(Check myCheck) {
         List<String> errors = validateCheck(myCheck);
         if (!errors.isEmpty()) {
             return new Response<>(null, errors);
         }
+        double sumTotal = calculateSumTotal(myCheck);
+        double vat = sumTotal * 0.2;
+        myCheck.setSumTotal(sumTotal);
+        myCheck.setVat(vat);
 
         String query = """
                 INSERT INTO my_check
@@ -130,6 +140,10 @@ public class CheckService {
             return new Response<>(null, Collections.singletonList("Can't update nonexistent check"));
         }
 
+        double sumTotal = calculateSumTotal(myCheck);
+        double vat = sumTotal * 0.2;
+        myCheck.setSumTotal(sumTotal);
+        myCheck.setVat(vat);
         String query = """
                 UPDATE my_check
                 SET id_employee = ?, card_number = ?, print_date = ?, sum_total = ?, vat = ?

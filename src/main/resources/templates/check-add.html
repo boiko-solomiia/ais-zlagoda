@@ -12,12 +12,18 @@
     <br><br>
 
     <label>Employee:</label>
-    <input type="text" th:field="*{idEmployee}">
+    <select th:field="*{idEmployee}">
+        <option value=""> Select employee </option>
+        <option th:each="employee : ${employees}"
+                th:value="${employee.idEmployee}"
+                th:text="${employee.emplSurname + ' ' + employee.emplName + ' (' + employee.idEmployee + ')'}">
+        </option>
+    </select>
     <br><br>
 
     <label>Customer card:</label>
     <select th:field="*{cardNumber}">
-        <option value="">-- No card --</option>
+        <option value=""> No card </option>
         <option th:each="card : ${customerCards}"
                 th:value="${card.cardNumber}"
                 th:text="${card.cardNumber}">

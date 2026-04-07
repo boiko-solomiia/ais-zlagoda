@@ -18,13 +18,12 @@ import java.util.List;
 public class CheckController {
 
     private final CheckService checkService;
-    // private final EmployeeService employeeService;
+    private final EmployeeService employeeService;
     private final CustomerCardService customerCardService;
 
-    public CheckController(CheckService checkService, // EmployeeService employeeService,
-                           CustomerCardService customerCardService) {
+    public CheckController(CheckService checkService,  EmployeeService employeeService, CustomerCardService customerCardService) {
         this.checkService = checkService;
-        // this.employeeService = employeeService;
+        this.employeeService = employeeService;
         this.customerCardService = customerCardService;
     }
 
@@ -42,11 +41,19 @@ public class CheckController {
 
     @GetMapping("/add")
     public String showAddForm(Model model) {
-        // Response<List<Employee>> employeesResponse = employeeService.findAll();
+        Response<List<Employee>> employeesResponse = employeeService.findAllEmployees();
         Response<List<CustomerCard>> cardsResponse = customerCardService.findAll();
 
+        if (!employeesResponse.getErrors().isEmpty() || !cardsResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors",
+                    !employeesResponse.getErrors().isEmpty()
+                            ? employeesResponse.getErrors()
+                            : cardsResponse.getErrors());
+            return "error-page";
+        }
+
         model.addAttribute("check", new Check());
-        // model.addAttribute("employees", employeesResponse.getObject());
+        model.addAttribute("employees", employeesResponse.getObject());
         model.addAttribute("customerCards", cardsResponse.getObject());
 
         return "check-add";
@@ -59,7 +66,7 @@ public class CheckController {
         if (!response.getErrors().isEmpty()) {
             model.addAttribute("errors", response.getErrors());
             model.addAttribute("check", myCheck);
-            // model.addAttribute("employees", employeeService.findAll().getObject());
+            model.addAttribute("employees", employeeService.findAllEmployees().getObject());
             model.addAttribute("customerCards", customerCardService.findAll().getObject());
             return "check-add";
         }
@@ -70,15 +77,25 @@ public class CheckController {
     @GetMapping("/edit/{checkNumber}")
     public String showEditForm(@PathVariable String checkNumber, Model model) {
         Response<Check> response = checkService.findCheckByNumber(checkNumber);
+        Response<List<Employee>> employeesResponse = employeeService.findAllEmployees();
+        Response<List<CustomerCard>> cardsResponse = customerCardService.findAll();
 
         if (!response.getErrors().isEmpty() || response.getObject() == null) {
             model.addAttribute("errors", response.getErrors());
             return "error-page";
         }
 
+        if (!employeesResponse.getErrors().isEmpty() || !cardsResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors",
+                    !employeesResponse.getErrors().isEmpty()
+                            ? employeesResponse.getErrors()
+                            : cardsResponse.getErrors());
+            return "error-page";
+        }
+
         model.addAttribute("check", response.getObject());
-        //model.addAttribute("employees", employeeService.findAll().getObject());
-        model.addAttribute("customerCards", customerCardService.findAll().getObject());
+        model.addAttribute("employees", employeesResponse.getObject());
+        model.addAttribute("customerCards", cardsResponse.getObject());
         return "check-edit";
     }
 
@@ -89,7 +106,7 @@ public class CheckController {
         if (!response.getErrors().isEmpty()) {
             model.addAttribute("errors", response.getErrors());
             model.addAttribute("check", myCheck);
-            // model.addAttribute("employees", employeeService.findAll().getObject());
+            model.addAttribute("employees", employeeService.findAllEmployees().getObject());
             model.addAttribute("customerCards", customerCardService.findAll().getObject());
             return "check-edit";
         }
