@@ -52,7 +52,25 @@ public class CheckService {
     }
 
     private double calculateSumTotal(Check myCheck) {
-        return 0.0;
+        String query = """
+                SELECT SUM(product_number * selling_price) AS total_sum
+                FROM sale
+                WHERE check_number = ?
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, myCheck.getCheckNumber());
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                double total = resultSet.getDouble("total_sum");
+                if (resultSet.wasNull()) {
+                    return 0.0;
+                }
+                return total;
+            }
+            return 0.0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Response<Check> createCheck(Check myCheck) {

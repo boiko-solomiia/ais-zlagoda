@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS store_product (
     selling_price DECIMAL(13,4) NOT NULL,
     products_number INT NOT NULL,
     promotional_product BOOLEAN NOT NULL,
-    FOREIGN KEY (upc_prom)
+    CONSTRAINT fk_store_product_upc_prom
+    FOREIGN KEY (upc_prom) REFERENCES store_product(upc)
     ON DELETE SET NULL
     ON UPDATE CASCADE,
     CONSTRAINT fk_store_product_product
@@ -32,6 +33,33 @@ CREATE TABLE IF NOT EXISTS store_product (
 
 );
 
+
+CREATE TABLE IF NOT EXISTS employee (
+    id_employee VARCHAR(10) PRIMARY KEY,
+    empl_surname VARCHAR(50) NOT NULL,
+    empl_name VARCHAR(50) NOT NULL,
+    empl_patronymic VARCHAR(50) NULL,
+    empl_role VARCHAR(10) NOT NULL,
+    salary DECIMAL(13,4) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    date_of_start DATE NOT NULL,
+    phone_number VARCHAR(13) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    street VARCHAR(50) NOT NULL,
+    zip_code VARCHAR(9) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS customer_card (
+    card_number VARCHAR(13) PRIMARY KEY,
+    cust_surname VARCHAR(50) NOT NULL,
+    cust_name VARCHAR(50) NOT NULL,
+    cust_patronymic VARCHAR(50) NULL,
+    phone_number VARCHAR(13) NOT NULL,
+    city VARCHAR(50) NULL,
+    street VARCHAR(50) NULL,
+    zip_code VARCHAR(9) NULL,
+    percent INT NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS my_check (
     check_number VARCHAR(10) PRIMARY KEY,
@@ -50,34 +78,6 @@ CREATE TABLE IF NOT EXISTS my_check (
     ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS employee (
-    id_employee VARCHAR(10) PRIMARY KEY,
-    empl_surname VARCHAR(50) NOT NULL,
-    empl_name VARCHAR(50) NOT NULL,
-    empl_patronymic VARCHAR(50) NULL,
-    empl_role VARCHAR(10) NOT NULL,
-    salary DECIMAL(13,4) NOT NULL,
-    date_of_birth DATE NOT NULL,
-    date_of_start DATE NOT NULL,
-    phone_number VARCHAR(13) NOT NULL,
-    city VARCHAR(50) NOT NULL,
-    street VARCHAR(50) NOT NULL,
-    zip_code VARCHAR(9) NOT NULL
-);
-
-
-
-CREATE TABLE IF NOT EXISTS customer_card (
-    card_number VARCHAR(13) PRIMARY KEY,
-    cust_surname VARCHAR(50) NOT NULL,
-    cust_name VARCHAR(50) NOT NULL,
-    cust_patronymic VARCHAR(50) NULL,
-    phone_number VARCHAR(13) NOT NULL,
-    city VARCHAR(50) NULL,
-    street VARCHAR(50) NULL,
-    zip_code VARCHAR(9) NULL,
-    percent INT NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS sale (
     upc VARCHAR(12) NOT NULL,
