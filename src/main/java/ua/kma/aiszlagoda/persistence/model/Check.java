@@ -4,19 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Check {
-    private Integer check_number;
-    private Integer id_employee;
-    private Integer card_number;
-    private Date print_date;
-    private Double sum_total;
+    private String checkNumber;
+    private String idEmployee;
+    private String cardNumber;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime printDate;
+    private Double sumTotal;
     private Double vat;
 
 }

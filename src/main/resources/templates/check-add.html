@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add check</title>
+</head>
+<body>
+<h2>Add Check</h2>
+
+<form th:action="@{/check/add}" method="post" th:object="${check}">
+    <label>Check number:</label>
+    <input type="text" th:field="*{checkNumber}">
+    <br><br>
+
+    <label>Employee:</label>
+    <input type="text" th:field="*{idEmployee}">
+    <br><br>
+
+    <label>Customer card:</label>
+    <select th:field="*{cardNumber}">
+        <option value="">-- No card --</option>
+        <option th:each="card : ${customerCards}"
+                th:value="${card.cardNumber}"
+                th:text="${card.cardNumber}">
+        </option>
+    </select>
+    <br><br>
+
+    <label>Print date:</label>
+    <input type="datetime-local" th:field="*{printDate}">
+    <br><br>
+
+    <button type="submit">Save</button>
+</form>
+
+<div th:if="${errors}">
+    <p th:each="err : ${errors}" th:text="${err}"></p>
+</div>
+
+<a th:href="@{/check}">Back</a>
+</body>
+</html>

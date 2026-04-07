@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Checks</title>
+</head>
+<body>
+<h2>Checks</h2>
+
+<a th:href="@{/check/add}">Add check</a>
+
+<ul>
+  <li th:each="ch : ${checks}">
+    <span th:text="${ch.checkNumber}"></span>
+    |
+    employee:
+    <span th:text="${ch.idEmployee}"></span>
+    |
+    card:
+    <span th:text="${ch.cardNumber}"></span>
+    |
+    date:
+    <span th:text="${#temporals.format(ch.printDate, 'yyyy-MM-dd HH:mm')}"></span>
+    |
+    total:
+    <span th:text="${ch.sumTotal}"></span>
+    |
+    vat:
+    <span th:text="${ch.vat}"></span>
+
+    <a th:href="@{/check/edit/{checkNumber}(checkNumber=${ch.checkNumber})}">Edit</a>
+
+    <form th:action="@{/check/delete/{checkNumber}(checkNumber=${ch.checkNumber})}" method="post" style="display:inline;">
+      <button type="submit">Delete</button>
+    </form>
+  </li>
+</ul>
+</body>
+</html>
