@@ -348,11 +348,6 @@ public class StoreProductService {
             }
 
             double price = resultSet.getDouble("selling_price");
-            boolean isPromotional = resultSet.getBoolean("promotional_product");
-
-            if (isPromotional) {
-                price = price * 0.8;
-            }
             return new Response<>(price, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
