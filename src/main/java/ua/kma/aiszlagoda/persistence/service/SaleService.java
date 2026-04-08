@@ -1,8 +1,10 @@
 package ua.kma.aiszlagoda.persistence.service;
 
 import org.springframework.stereotype.Service;
+import ua.kma.aiszlagoda.persistence.model.Check;
 import ua.kma.aiszlagoda.persistence.model.Sale;
 import ua.kma.aiszlagoda.persistence.model.Response;
+import ua.kma.aiszlagoda.persistence.model.SaleRequest;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,10 +15,12 @@ import java.util.List;
 @Service
 public class SaleService {
     private final Connection connection;
+    private final StoreProductService storeProductService;
 
 
-    public SaleService(Connection connection) {
+    public SaleService(Connection connection, StoreProductService storeProductService) {
         this.connection = connection;
+        this.storeProductService = storeProductService;
     }
 
     private List<String> validateSale(Sale sale) {
@@ -47,6 +51,12 @@ public class SaleService {
             return new Response<>(null, errors);
         }
 
+        if (!storeProductService.checkStockAvailability(sale.getUpc(), sale.getProductNumber()).getObject()) {
+            return new Response<>(null, Collections.singletonList(
+                    "Not enough stock for sale"
+            ));
+        }
+
         String query = """
                 INSERT INTO sale
                 (upc, check_number, product_number, selling_price)
@@ -64,10 +74,31 @@ public class SaleService {
                 return new Response<>(null, Collections.singletonList("Failed to save sale"));
             }
 
+            Response<Void> stockUpdate = storeProductService.updateStockAfterSale(sale.getUpc(), sale.getProductNumber());
+            if (!stockUpdate.getErrors().isEmpty()) {
+                return new Response<>(null, stockUpdate.getErrors());
+            }
+
             return new Response<>(sale, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
+    }
+
+    public Response<Void> createSalesFromItems(List<SaleRequest> items, String checkNumber) {
+        for (SaleRequest item : items) {
+            Sale sale = new Sale(
+                    item.getUpc(),
+                    checkNumber,
+                    item.getProductNumber(),
+                    item.getSellingPrice()
+            );
+            Response<Sale> response = createSale(sale);
+            if (!response.getErrors().isEmpty()) {
+                return new Response<>(null, response.getErrors());
+            }
+        }
+        return new Response<>(null, new LinkedList<>());
     }
 
     public Response<Sale> deleteSale(String upc, String checkNumber) {
@@ -83,7 +114,7 @@ public class SaleService {
 
             int rows = statement.executeUpdate();
             if (rows == 0) {
-                return new Response<>(null, Collections.singletonList("Failed to delete check"));
+                return new Response<>(null, Collections.singletonList("Failed to delete sale"));
             }
 
             return new Response<>(null, new LinkedList<>());
@@ -91,6 +122,23 @@ public class SaleService {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
     }
+
+    public Response<Void> deleteSalesByCheckNumber(String checkNumber) {
+        if (checkNumber == null || checkNumber.isBlank()) {
+            return new Response<>(null, Collections.singletonList("Check number can't be empty"));
+        }
+
+        String query = "DELETE FROM sale WHERE check_number = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, checkNumber);
+            statement.executeUpdate();
+            return new Response<>(null, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
 
     private Response<Sale> findSaleByUpcAndCheck(String upc, String checkNumber) {
         String query = "SELECT * FROM sale WHERE upc = ? AND check_number = ?";
@@ -151,20 +199,51 @@ public class SaleService {
         }
     }
 
-    public boolean checkStockAvailability(String upc, int requestedQuantity) {
+    public Response<Void> checkStockForSaleItems(List<SaleRequest> items) {
+        for (SaleRequest item : items) {
+            Response<Boolean> stockCheck = storeProductService.checkStockAvailability(
+                    item.getUpc(), item.getProductNumber()
+            );
+            if (!stockCheck.getErrors().isEmpty()) {
+                return new Response<>(null, stockCheck.getErrors());
+            }
+            if (!stockCheck.getObject()) {
+                return new Response<>(null, Collections.singletonList(
+                        "Not enough stock for UPC: " + item.getUpc()
+                ));
+            }
+        }
+        return new Response<>(null, new LinkedList<>());
+    }
+
+    public double calculateTotalForSaleItems(List<SaleRequest> items) {
+        double total = 0.0;
+        for (SaleRequest item : items) {
+            total += item.getProductNumber() * item.getSellingPrice();
+        }
+        return total;
+    }
+
+    public double calculateSumTotal(String checkNumber) {
         String query = """
-        SELECT products_number 
-        FROM store_product 
-        WHERE upc = ? AND products_number >= ?
-        """;
+                SELECT SUM(product_number * selling_price) AS total_sum
+                FROM sale
+                WHERE check_number = ?
+                """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, upc);
-            statement.setInt(2, requestedQuantity);
+            statement.setString(1, checkNumber);
             ResultSet resultSet = statement.executeQuery();
-            return resultSet.next();
+            if (resultSet.next()) {
+                double total = resultSet.getDouble("total_sum");
+                if (resultSet.wasNull()) {
+                    return 0.0;
+                }
+                return total;
+            }
+            return 0.0;
         } catch (SQLException e) {
-            return false;
+            throw new RuntimeException(e);
         }
     }
 
