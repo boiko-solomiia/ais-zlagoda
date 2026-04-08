@@ -303,26 +303,4 @@ public class CheckService {
             return 0.0;
         }
     }
-
-    public double productNumberTotalByPeriod(String upc, LocalDateTime start, LocalDateTime end) {
-        String query = """
-            SELECT COALESCE(SUM(product_number), 0) AS total
-            FROM my_check
-            INNER JOIN sale ON my_check.check_number = sale.check_number
-            WHERE upc = ? AND print_date BETWEEN ? AND ?
-            """;
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, upc);
-            statement.setTimestamp(2, Timestamp.valueOf(start));
-            statement.setTimestamp(3, Timestamp.valueOf(end));
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getDouble("total");
-            }
-            return 0.0;
-        } catch (SQLException e) {
-            return 0.0;
-        }
-    }
 }
