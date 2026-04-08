@@ -209,10 +209,10 @@ public class CustomerCardService {
     }
 
     public Response<List<CustomerCard>> findCustomerCardsBySurname(String surname) {
-        String query = "SELECT * FROM customer_card WHERE cust_surname LIKE ? ORDER BY cust_surname ASC";
+        String query = "SELECT * FROM customer_card WHERE cust_surname = ? ORDER BY cust_surname ASC";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, "%" + surname + "%");
+            statement.setString(1, surname);
             ResultSet resultSet = statement.executeQuery();
             List<CustomerCard> customerCards = new LinkedList<>();
 

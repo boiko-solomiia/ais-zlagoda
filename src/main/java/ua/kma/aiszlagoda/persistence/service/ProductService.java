@@ -137,10 +137,10 @@ public class ProductService {
     }
 
     public Response<List<Product>> findProductsByName(String productName) {
-        String query = "SELECT * FROM product WHERE product_name LIKE ? ORDER BY product_name ASC";
+        String query = "SELECT * FROM product WHERE product_name = ? ORDER BY product_name ASC";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, "%" + productName + "%");
+            statement.setString(1, productName);
 
             ResultSet resultSet = statement.executeQuery();
             List<Product> products = new LinkedList<>();
