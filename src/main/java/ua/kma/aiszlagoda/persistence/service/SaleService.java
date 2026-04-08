@@ -1,7 +1,6 @@
 package ua.kma.aiszlagoda.persistence.service;
 
 import org.springframework.stereotype.Service;
-import ua.kma.aiszlagoda.persistence.model.Check;
 import ua.kma.aiszlagoda.persistence.model.Sale;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.model.SaleRequest;
@@ -85,13 +84,18 @@ public class SaleService {
         }
     }
 
-    public Response<Void> createSalesFromItems(List<SaleRequest> items, String checkNumber) {
-        for (SaleRequest item : items) {
+    public Response<Void> createSalesFromRequests(List<SaleRequest> requests, String checkNumber) {
+        for (SaleRequest item : requests) {
+            Response<Double> priceResponse = storeProductService.getCurrentSellingPrice(item.getUpc());
+            if (!priceResponse.getErrors().isEmpty()) {
+                return new Response<>(null, priceResponse.getErrors());
+            }
+
             Sale sale = new Sale(
                     item.getUpc(),
                     checkNumber,
                     item.getProductNumber(),
-                    item.getSellingPrice()
+                    priceResponse.getObject()
             );
             Response<Sale> response = createSale(sale);
             if (!response.getErrors().isEmpty()) {
@@ -216,12 +220,16 @@ public class SaleService {
         return new Response<>(null, new LinkedList<>());
     }
 
-    public double calculateTotalForSaleItems(List<SaleRequest> items) {
+    public Response<Double> calculateTotalForSaleItems(List<SaleRequest> items) {
         double total = 0.0;
         for (SaleRequest item : items) {
-            total += item.getProductNumber() * item.getSellingPrice();
+            Response<Double> priceResponse = storeProductService.getCurrentSellingPrice(item.getUpc());
+            if (!priceResponse.getErrors().isEmpty()) {
+                return new Response<>(null, priceResponse.getErrors());
+            }
+            total += item.getProductNumber() * priceResponse.getObject();
         }
-        return total;
+        return new Response<>(total, new LinkedList<>());
     }
 
     public double calculateSumTotal(String checkNumber) {

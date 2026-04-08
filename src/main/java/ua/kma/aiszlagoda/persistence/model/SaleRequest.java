@@ -12,5 +12,4 @@ import lombok.Setter;
 public class SaleRequest {
     private String upc;
     private Integer productNumber;
-    private Double sellingPrice;
 }

@@ -3,7 +3,6 @@ package ua.kma.aiszlagoda.persistence.service;
 import org.springframework.stereotype.Service;
 import ua.kma.aiszlagoda.persistence.model.Check;
 import ua.kma.aiszlagoda.persistence.model.Response;
-import ua.kma.aiszlagoda.persistence.model.Sale;
 import ua.kma.aiszlagoda.persistence.model.SaleRequest;
 
 import java.time.LocalDateTime;
@@ -102,7 +101,12 @@ public class CheckService {
             return new Response<>(null, stockCheck.getErrors());
         }
 
-        double total = saleService.calculateTotalForSaleItems(items);
+        Response<Double> totalResponse = saleService.calculateTotalForSaleItems(items);
+        if (!totalResponse.getErrors().isEmpty()) {
+            return new Response<>(null, totalResponse.getErrors());
+        }
+
+        double total = totalResponse.getObject();
         check.setSumTotal(total);
         check.setVat(total * 0.2);
 
@@ -111,11 +115,10 @@ public class CheckService {
             return checkResponse;
         }
 
-        Response<Void> salesResponse = saleService.createSalesFromItems(items, check.getCheckNumber());
+        Response<Void> salesResponse = saleService.createSalesFromRequests(items, check.getCheckNumber());
         if (!salesResponse.getErrors().isEmpty()) {
             return new Response<>(null, salesResponse.getErrors());
         }
-
         return new Response<>(check, new LinkedList<>());
     }
 
