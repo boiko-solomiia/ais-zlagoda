@@ -68,8 +68,8 @@ public class StoreProductService {
         try {
             connection.setAutoCommit(false);
             if (!storeProduct.isPromotionalProduct() &&
-                storeProduct.getUpcProm() != null &&
-                !storeProduct.getUpcProm().isBlank()) {
+                    storeProduct.getUpcProm() != null &&
+                    !storeProduct.getUpcProm().isBlank()) {
                 StoreProduct promo = new StoreProduct();
                 promo.setUpc(storeProduct.getUpcProm());
                 promo.setUpcProm(null);
@@ -190,8 +190,8 @@ public class StoreProductService {
                     throw new SQLException("Failed to update store product");
                 }
                 if (!storeProduct.isPromotionalProduct() &&
-                    storeProduct.getUpcProm() != null &&
-                    !storeProduct.getUpcProm().isBlank()) {
+                        storeProduct.getUpcProm() != null &&
+                        !storeProduct.getUpcProm().isBlank()) {
 
                     String promoQuery = """
                                 UPDATE store_product 
@@ -238,8 +238,8 @@ public class StoreProductService {
         try {
             connection.setAutoCommit(false);
             if (!product.isPromotionalProduct() &&
-                product.getUpcProm() != null &&
-                !product.getUpcProm().isBlank()) {
+                    product.getUpcProm() != null &&
+                    !product.getUpcProm().isBlank()) {
                 try (PreparedStatement statement = connection.prepareStatement(
                         "DELETE FROM store_product WHERE upc = ?")) {
                     statement.setString(1, product.getUpcProm());
@@ -281,132 +281,219 @@ public class StoreProductService {
         }
     }
 
-public Response<List<StoreProduct>> findNonPromotionalProducts() {
-    String query = "SELECT * FROM store_product WHERE promotional_product = false ORDER BY products_number ASC";
+    public Response<List<StoreProduct>> findNonPromotionalProducts() {
+        String query = "SELECT * FROM store_product WHERE promotional_product = false ORDER BY products_number ASC";
 
-    try (PreparedStatement statement = connection.prepareStatement(query)) {
-        ResultSet resultSet = statement.executeQuery();
-        List<StoreProduct> storeProducts = new LinkedList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<StoreProduct> storeProducts = new LinkedList<>();
 
-        while (resultSet.next()) {
-            storeProducts.add(storeProductFromResultSet(resultSet));
+            while (resultSet.next()) {
+                storeProducts.add(storeProductFromResultSet(resultSet));
+            }
+
+            return new Response<>(storeProducts, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private StoreProductInfo storeProductInfoFromResultSet(ResultSet resultSet) throws SQLException {
+        return new StoreProductInfo(
+                resultSet.getString("product_name"),
+                resultSet.getString("characteristics"),
+                resultSet.getDouble("selling_price"),
+                resultSet.getInt("products_number")
+        );
+    }
+
+    public Response<StoreProductInfo> findStoreProductInfoByUPC(String upc) {
+        String query = """
+                SELECT p.product_name,
+                       p.characteristics,
+                       sp.selling_price,
+                       sp.products_number
+                FROM store_product sp
+                JOIN product p ON sp.product_id = p.product_id
+                WHERE sp.upc = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, upc);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return new Response<>(storeProductInfoFromResultSet(resultSet), new LinkedList<>());
+            } else {
+                return new Response<>(null, Collections.singletonList("Store product info not found"));
+            }
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<Double> getCurrentSellingPrice(String upc) {
+        String query = """
+                SELECT selling_price, promotional_product 
+                FROM store_product 
+                WHERE upc = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, upc);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) {
+                return new Response<>(null, Collections.singletonList("Can't get current selling price for nonexistent store product"));
+            }
+
+            double price = resultSet.getDouble("selling_price");
+            boolean isPromotional = resultSet.getBoolean("promotional_product");
+
+            if (isPromotional) {
+                price = price * 0.8;
+            }
+            return new Response<>(price, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<List<StoreProductInfo>> findAllStoreProductsSortedByName() {
+        String query = """
+                SELECT p.product_name,
+                       p.characteristics,
+                       sp.selling_price,
+                       sp.products_number
+                FROM store_product sp
+                JOIN product p ON sp.product_id = p.product_id
+                ORDER BY p.product_name ASC
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<StoreProductInfo> storeProducts = new LinkedList<>();
+
+            while (resultSet.next()) {
+                storeProducts.add(storeProductInfoFromResultSet(resultSet));
+            }
+
+            return new Response<>(storeProducts, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+
+    public Response<List<StoreProductInfo>> findPromotionalProductsSortedByName() {
+        String query = """
+                SELECT p.product_name,
+                       p.characteristics,
+                       sp.selling_price,
+                       sp.products_number
+                FROM store_product sp
+                JOIN product p ON sp.product_id = p.product_id
+                WHERE sp.promotional_product = true
+                ORDER BY p.product_name ASC
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<StoreProductInfo> storeProducts = new LinkedList<>();
+
+            while (resultSet.next()) {
+                storeProducts.add(storeProductInfoFromResultSet(resultSet));
+            }
+
+            return new Response<>(storeProducts, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<List<StoreProductInfo>> findNonPromotionalProductsSortedByName() {
+        String query = """
+                SELECT p.product_name,
+                       p.characteristics,
+                       sp.selling_price,
+                       sp.products_number
+                FROM store_product sp
+                JOIN product p ON sp.product_id = p.product_id
+                WHERE sp.promotional_product = false
+                ORDER BY p.product_name ASC
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<StoreProductInfo> storeProducts = new LinkedList<>();
+
+            while (resultSet.next()) {
+                storeProducts.add(storeProductInfoFromResultSet(resultSet));
+            }
+
+            return new Response<>(storeProducts, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<Boolean> checkStockAvailability(String upc, int requestedQuantity) {
+        String query = """
+                SELECT products_number 
+                FROM store_product 
+                WHERE upc = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, upc);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) {
+                return new Response<>(false, Collections.singletonList("Can't check stock for nonexistent store product"));
+            }
+
+            int availableQuantity = resultSet.getInt("products_number");
+            boolean isAvailable = availableQuantity >= requestedQuantity;
+
+            if (!isAvailable) {
+                return new Response<>(false, Collections.singletonList(
+                        "Not enough stock. Available: " + availableQuantity + ", requested: " + requestedQuantity
+                ));
+            }
+            return new Response<>(true, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<Void> updateStockAfterSale(String upc, Integer soldQuantity) {
+        if (soldQuantity == null || soldQuantity <= 0) {
+            return new Response<>(null, Collections.singletonList("Quantity must be positive"));
         }
 
-        return new Response<>(storeProducts, new LinkedList<>());
-    } catch (SQLException e) {
-        return new Response<>(null, Collections.singletonList(e.getMessage()));
-    }
-}
+        String query = """
+                UPDATE store_product 
+                SET products_number = products_number - ? 
+                WHERE upc = ? AND products_number >= ?
+                """;
 
-private StoreProductInfo storeProductInfoFromResultSet(ResultSet resultSet) throws SQLException {
-    return new StoreProductInfo(
-            resultSet.getString("product_name"),
-            resultSet.getString("characteristics"),
-            resultSet.getDouble("selling_price"),
-            resultSet.getInt("products_number")
-    );
-}
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, soldQuantity);
+            statement.setString(2, upc);
+            statement.setInt(3, soldQuantity);
 
-public Response<StoreProductInfo> findStoreProductInfoByUPC(String upc) {
-    String query = """
-            SELECT p.product_name,
-                   p.characteristics,
-                   sp.selling_price,
-                   sp.products_number
-            FROM store_product sp
-            JOIN product p ON sp.product_id = p.product_id
-            WHERE sp.upc = ?
-            """;
-
-    try (PreparedStatement statement = connection.prepareStatement(query)) {
-        statement.setString(1, upc);
-        ResultSet resultSet = statement.executeQuery();
-
-        if (resultSet.next()) {
-            return new Response<>(storeProductInfoFromResultSet(resultSet), new LinkedList<>());
-        } else {
-            return new Response<>(null, Collections.singletonList("Store product info not found"));
+            int rowsUpdated = statement.executeUpdate();
+            if (rowsUpdated == 0) {
+                Response<StoreProduct> productCheck = findStoreProductByUPC(upc);
+                if (productCheck.getObject() == null) {
+                    return new Response<>(null, Collections.singletonList("Can't update stock for nonexistent store product"));
+                } else {
+                    return new Response<>(null, Collections.singletonList("Not enough stock"));
+                }
+            }
+            return new Response<>(null, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
-    } catch (SQLException e) {
-        return new Response<>(null, Collections.singletonList(e.getMessage()));
     }
-}
-
-public Response<List<StoreProductInfo>> findAllStoreProductsSortedByName() {
-    String query = """
-            SELECT p.product_name,
-                   p.characteristics,
-                   sp.selling_price,
-                   sp.products_number
-            FROM store_product sp
-            JOIN product p ON sp.product_id = p.product_id
-            ORDER BY p.product_name ASC
-            """;
-
-    try (PreparedStatement statement = connection.prepareStatement(query)) {
-        ResultSet resultSet = statement.executeQuery();
-        List<StoreProductInfo> storeProducts = new LinkedList<>();
-
-        while (resultSet.next()) {
-            storeProducts.add(storeProductInfoFromResultSet(resultSet));
-        }
-
-        return new Response<>(storeProducts, new LinkedList<>());
-    } catch (SQLException e) {
-        return new Response<>(null, Collections.singletonList(e.getMessage()));
-    }
-}
-
-
-public Response<List<StoreProductInfo>> findPromotionalProductsSortedByName() {
-    String query = """
-            SELECT p.product_name,
-                   p.characteristics,
-                   sp.selling_price,
-                   sp.products_number
-            FROM store_product sp
-            JOIN product p ON sp.product_id = p.product_id
-            WHERE sp.promotional_product = true
-            ORDER BY p.product_name ASC
-            """;
-
-    try (PreparedStatement statement = connection.prepareStatement(query)) {
-        ResultSet resultSet = statement.executeQuery();
-        List<StoreProductInfo> storeProducts = new LinkedList<>();
-
-        while (resultSet.next()) {
-            storeProducts.add(storeProductInfoFromResultSet(resultSet));
-        }
-
-        return new Response<>(storeProducts, new LinkedList<>());
-    } catch (SQLException e) {
-        return new Response<>(null, Collections.singletonList(e.getMessage()));
-    }
-}
-
-public Response<List<StoreProductInfo>> findNonPromotionalProductsSortedByName() {
-    String query = """
-            SELECT p.product_name,
-                   p.characteristics,
-                   sp.selling_price,
-                   sp.products_number
-            FROM store_product sp
-            JOIN product p ON sp.product_id = p.product_id
-            WHERE sp.promotional_product = false
-            ORDER BY p.product_name ASC
-            """;
-
-    try (PreparedStatement statement = connection.prepareStatement(query)) {
-        ResultSet resultSet = statement.executeQuery();
-        List<StoreProductInfo> storeProducts = new LinkedList<>();
-
-        while (resultSet.next()) {
-            storeProducts.add(storeProductInfoFromResultSet(resultSet));
-        }
-
-        return new Response<>(storeProducts, new LinkedList<>());
-    } catch (SQLException e) {
-        return new Response<>(null, Collections.singletonList(e.getMessage()));
-    }
-}
 }

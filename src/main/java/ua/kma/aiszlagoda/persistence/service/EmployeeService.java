@@ -112,6 +112,27 @@ public class EmployeeService {
         }
     }
 
+    public Response<Employee> deleteEmployee(String employeeId) {
+        if (findEmployeeById(employeeId).getObject() == null) {
+            return new Response<>(null, Collections.singletonList("Can't delete nonexistent employee"));
+        }
+
+        String query = "DELETE FROM employee WHERE id_employee = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, employeeId);
+
+            int rows = statement.executeUpdate();
+            if (rows == 0) {
+                return new Response<>(null, Collections.singletonList("Failed to delete employee"));
+            }
+
+            return new Response<>(null, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
     public Response<Employee> updateEmployee(Employee employee) {
         List<String> errors = validateEmployee(employee);
         if (!errors.isEmpty()) {

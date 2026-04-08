@@ -3,6 +3,7 @@ package ua.kma.aiszlagoda.persistence.service;
 import org.springframework.stereotype.Service;
 import ua.kma.aiszlagoda.persistence.model.Check;
 import ua.kma.aiszlagoda.persistence.model.Response;
+import ua.kma.aiszlagoda.persistence.model.SaleRequest;
 
 import java.time.LocalDateTime;
 import java.sql.*;
@@ -14,9 +15,11 @@ import java.util.List;
 public class CheckService {
 
     private final Connection connection;
+    private final SaleService saleService;
 
-    public CheckService(Connection connection) {
+    public CheckService(Connection connection , SaleService saleService) {
         this.connection = connection;
+        this.saleService = saleService;
     }
 
     private List<String> validateCheck(Check myCheck) {
@@ -51,34 +54,12 @@ public class CheckService {
         );
     }
 
-    private double calculateSumTotal(Check myCheck) {
-        String query = """
-                SELECT SUM(product_number * selling_price) AS total_sum
-                FROM sale
-                WHERE check_number = ?
-                """;
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, myCheck.getCheckNumber());
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                double total = resultSet.getDouble("total_sum");
-                if (resultSet.wasNull()) {
-                    return 0.0;
-                }
-                return total;
-            }
-            return 0.0;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public Response<Check> createCheck(Check myCheck) {
         List<String> errors = validateCheck(myCheck);
         if (!errors.isEmpty()) {
             return new Response<>(null, errors);
         }
-        double sumTotal = calculateSumTotal(myCheck);
+        double sumTotal = saleService.calculateSumTotal(myCheck.getCheckNumber());
         double vat = sumTotal * 0.2;
         myCheck.setSumTotal(sumTotal);
         myCheck.setVat(vat);
@@ -112,6 +93,33 @@ public class CheckService {
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
+    }
+
+    public Response<Check> createCheckWithSales(Check check, List<SaleRequest> items) {
+        Response<Void> stockCheck = saleService.checkStockForSaleItems(items);
+        if (!stockCheck.getErrors().isEmpty()) {
+            return new Response<>(null, stockCheck.getErrors());
+        }
+
+        Response<Double> totalResponse = saleService.calculateTotalForSaleItems(items);
+        if (!totalResponse.getErrors().isEmpty()) {
+            return new Response<>(null, totalResponse.getErrors());
+        }
+
+        double total = totalResponse.getObject();
+        check.setSumTotal(total);
+        check.setVat(total * 0.2);
+
+        Response<Check> checkResponse = createCheck(check);
+        if (!checkResponse.getErrors().isEmpty()) {
+            return checkResponse;
+        }
+
+        Response<Void> salesResponse = saleService.createSalesFromRequests(items, check.getCheckNumber());
+        if (!salesResponse.getErrors().isEmpty()) {
+            return new Response<>(null, salesResponse.getErrors());
+        }
+        return new Response<>(check, new LinkedList<>());
     }
 
     public Response<List<Check>> findAll() {
@@ -158,7 +166,7 @@ public class CheckService {
             return new Response<>(null, Collections.singletonList("Can't update nonexistent check"));
         }
 
-        double sumTotal = calculateSumTotal(myCheck);
+        double sumTotal = saleService.calculateSumTotal(myCheck.getCheckNumber());
         double vat = sumTotal * 0.2;
         myCheck.setSumTotal(sumTotal);
         myCheck.setVat(vat);
@@ -196,6 +204,11 @@ public class CheckService {
     public Response<Check> deleteCheck(String checkNumber) {
         if (findCheckByNumber(checkNumber).getObject() == null) {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent check"));
+        }
+
+        Response<Void> deleteSales = saleService.deleteSalesByCheckNumber(checkNumber);
+        if (!deleteSales.getErrors().isEmpty()) {
+            return new Response<>(null, deleteSales.getErrors());
         }
 
         String query = "DELETE FROM my_check WHERE check_number = ?";
