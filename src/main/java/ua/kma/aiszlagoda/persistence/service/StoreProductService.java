@@ -332,6 +332,33 @@ public class StoreProductService {
         }
     }
 
+    public Response<Double> getCurrentSellingPrice(String upc) {
+        String query = """
+                SELECT selling_price, promotional_product 
+                FROM store_product 
+                WHERE upc = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, upc);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) {
+                return new Response<>(null, Collections.singletonList("Can't get current selling price for nonexistent store product"));
+            }
+
+            double price = resultSet.getDouble("selling_price");
+            boolean isPromotional = resultSet.getBoolean("promotional_product");
+
+            if (isPromotional) {
+                price = price * 0.8;
+            }
+            return new Response<>(price, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
     public Response<List<StoreProductInfo>> findAllStoreProductsSortedByName() {
         String query = """
                 SELECT p.product_name,
