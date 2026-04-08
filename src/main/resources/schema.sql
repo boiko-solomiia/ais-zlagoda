@@ -94,3 +94,14 @@ CREATE TABLE IF NOT EXISTS sale (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS user_account (
+    id_account INT AUTO_INCREMENT PRIMARY KEY,
+    id_employee VARCHAR(10) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    CONSTRAINT fk_user_account_employee
+    FOREIGN KEY (id_employee) REFERENCES employee(id_employee)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
