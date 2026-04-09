@@ -16,7 +16,6 @@ public class SaleService {
     private final Connection connection;
     private final StoreProductService storeProductService;
 
-
     public SaleService(Connection connection, StoreProductService storeProductService) {
         this.connection = connection;
         this.storeProductService = storeProductService;
@@ -42,6 +41,33 @@ public class SaleService {
         }
 
         return errors;
+    }
+
+    private Sale saleFromResultSet(ResultSet resultSet) throws SQLException {
+        return new Sale(
+                resultSet.getString("upc"),
+                resultSet.getString("check_number"),
+                resultSet.getInt("product_number"),
+                resultSet.getDouble("selling_price")
+        );
+    }
+
+    private Response<Sale> findSaleByUpcAndCheck(String upc, String checkNumber) {
+        String query = "SELECT * FROM sale WHERE upc = ? AND check_number = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, upc);
+            statement.setString(2, checkNumber);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return new Response<>(saleFromResultSet(resultSet), new LinkedList<>());
+            } else {
+                return new Response<>(null, Collections.singletonList("Sale not found"));
+            }
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
     }
 
     public Response<Sale> createSale(Sale sale) {
@@ -127,41 +153,6 @@ public class SaleService {
         }
     }
 
-    public Response<Void> deleteSalesByCheckNumber(String checkNumber) {
-        if (checkNumber == null || checkNumber.isBlank()) {
-            return new Response<>(null, Collections.singletonList("Check number can't be empty"));
-        }
-
-        String query = "DELETE FROM sale WHERE check_number = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, checkNumber);
-            statement.executeUpdate();
-            return new Response<>(null, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-
-    private Response<Sale> findSaleByUpcAndCheck(String upc, String checkNumber) {
-        String query = "SELECT * FROM sale WHERE upc = ? AND check_number = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, upc);
-            statement.setString(2, checkNumber);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                return new Response<>(saleFromResultSet(resultSet), new LinkedList<>());
-            } else {
-                return new Response<>(null, Collections.singletonList("Sale not found"));
-            }
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
     public Response<List<Sale>> findSalesForCheck(String checkNumber) {
         String query = "SELECT * FROM sale WHERE check_number = ?";
 
@@ -203,6 +194,29 @@ public class SaleService {
         }
     }
 
+    public double calculateSumTotal(String checkNumber) {
+        String query = """
+                SELECT SUM(product_number * selling_price) AS total_sum
+                FROM sale
+                WHERE check_number = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, checkNumber);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                double total = resultSet.getDouble("total_sum");
+                if (resultSet.wasNull()) {
+                    return 0.0;
+                }
+                return total;
+            }
+            return 0.0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Response<Void> checkStockForSaleItems(List<SaleRequest> items) {
         for (SaleRequest item : items) {
             Response<Boolean> stockCheck = storeProductService.checkStockAvailability(
@@ -230,37 +244,5 @@ public class SaleService {
             total += item.getProductNumber() * priceResponse.getObject();
         }
         return new Response<>(total, new LinkedList<>());
-    }
-
-    public double calculateSumTotal(String checkNumber) {
-        String query = """
-                SELECT SUM(product_number * selling_price) AS total_sum
-                FROM sale
-                WHERE check_number = ?
-                """;
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, checkNumber);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                double total = resultSet.getDouble("total_sum");
-                if (resultSet.wasNull()) {
-                    return 0.0;
-                }
-                return total;
-            }
-            return 0.0;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Sale saleFromResultSet(ResultSet resultSet) throws SQLException {
-        return new Sale(
-                resultSet.getString("upc"),
-                resultSet.getString("check_number"),
-                resultSet.getInt("product_number"),
-                resultSet.getDouble("selling_price")
-        );
     }
 }

@@ -28,6 +28,13 @@ public class CategoryService {
         return errors;
     }
 
+    private Category categoryFromResultSet(ResultSet resultSet) throws SQLException {
+        return new Category(
+                resultSet.getInt("category_number"),
+                resultSet.getString("category_name")
+        );
+    }
+
     public Response<Category> createCategory(Category category) {
         List<String> errors = validateCategory(category);
         if (!errors.isEmpty()) {
@@ -49,28 +56,6 @@ public class CategoryService {
             }
 
             return new Response<>(category, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-    private Category categoryFromResultSet(ResultSet resultSet) throws SQLException {
-        return new Category(
-                resultSet.getInt("category_number"),
-                resultSet.getString("category_name")
-        );
-    }
-
-    public Response<Category> findCategoryById(int categoryNumber) {
-        String query = "SELECT * FROM category WHERE category_number = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, categoryNumber);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return new Response<>(categoryFromResultSet(resultSet), new LinkedList<>());
-            } else {
-                return new Response<>(null, Collections.singletonList("Category not found"));
-            }
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
@@ -116,7 +101,7 @@ public class CategoryService {
     }
 
     public Response<List<Category>> findAll() {
-        String query = "SELECT * FROM category ORDER BY category_name ASC";
+        String query = "SELECT * FROM category ORDER BY category_name";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             List<Category> categories = new LinkedList<>();
@@ -124,6 +109,21 @@ public class CategoryService {
                 categories.add(categoryFromResultSet(resultSet));
             }
             return new Response<>(categories, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<Category> findCategoryById(int categoryNumber) {
+        String query = "SELECT * FROM category WHERE category_number = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, categoryNumber);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new Response<>(categoryFromResultSet(resultSet), new LinkedList<>());
+            } else {
+                return new Response<>(null, Collections.singletonList("Category not found"));
+            }
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }

@@ -96,40 +96,6 @@ public class CustomerCardService {
         }
     }
 
-    public Response<List<CustomerCard>> findAll() {
-        String query = "SELECT * FROM customer_card ORDER BY cust_surname ASC";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            ResultSet resultSet = statement.executeQuery();
-            List<CustomerCard> customerCards = new LinkedList<>();
-
-            while (resultSet.next()) {
-                customerCards.add(customerCardFromResultSet(resultSet));
-            }
-
-            return new Response<>(customerCards, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-    public Response<CustomerCard> findCustomerCardByNumber(String cardNumber) {
-        String query = "SELECT * FROM customer_card WHERE card_number = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, cardNumber);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                return new Response<>(customerCardFromResultSet(resultSet), new LinkedList<>());
-            } else {
-                return new Response<>(null, Collections.singletonList("Customer card not found"));
-            }
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
     public Response<CustomerCard> updateCustomerCard(CustomerCard customerCard) {
         List<String> errors = validateCustomerCard(customerCard);
         if (!errors.isEmpty()) {
@@ -185,6 +151,40 @@ public class CustomerCardService {
             }
 
             return new Response<>(null, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<List<CustomerCard>> findAll() {
+        String query = "SELECT * FROM customer_card ORDER BY cust_surname ASC";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<CustomerCard> customerCards = new LinkedList<>();
+
+            while (resultSet.next()) {
+                customerCards.add(customerCardFromResultSet(resultSet));
+            }
+
+            return new Response<>(customerCards, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<CustomerCard> findCustomerCardByNumber(String cardNumber) {
+        String query = "SELECT * FROM customer_card WHERE card_number = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, cardNumber);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return new Response<>(customerCardFromResultSet(resultSet), new LinkedList<>());
+            } else {
+                return new Response<>(null, Collections.singletonList("Customer card not found"));
+            }
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }

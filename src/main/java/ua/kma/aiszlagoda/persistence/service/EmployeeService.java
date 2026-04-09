@@ -80,6 +80,38 @@ public class EmployeeService {
         return errors;
     }
 
+    private boolean isAtLeast18YearsOld(LocalDate birthDate) {
+        LocalDate today = LocalDate.now();
+        Period period = Period.between(birthDate, today);
+        return period.getYears() >= 18;
+    }
+
+    private Employee employeeFromResultSet(ResultSet resultSet) throws SQLException {
+        return new Employee(
+                resultSet.getString("id_employee"),
+                resultSet.getString("empl_surname"),
+                resultSet.getString("empl_name"),
+                resultSet.getString("empl_patronymic"),
+                resultSet.getString("empl_role"),
+                resultSet.getDouble("salary"),
+                resultSet.getDate("date_of_birth").toLocalDate(),
+                resultSet.getDate("date_of_start").toLocalDate(),
+                resultSet.getString("phone_number"),
+                resultSet.getString("city"),
+                resultSet.getString("street"),
+                resultSet.getString("zip_code")
+        );
+    }
+
+    private EmployeeInfo employeeInfoFromResultSet(ResultSet resultSet) throws SQLException {
+        return new EmployeeInfo(
+                resultSet.getString("phone_number"),
+                resultSet.getString("city"),
+                resultSet.getString("street"),
+                resultSet.getString("zip_code")
+        );
+    }
+
     public Response<Employee> createEmployee(Employee employee) {
         List<String> errors = validateEmployee(employee);
         if (!errors.isEmpty()) {
@@ -107,27 +139,6 @@ public class EmployeeService {
                 return new Response<>(null, Collections.singletonList("Failed to save employee"));
             }
             return new Response<>(employee, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-    public Response<Employee> deleteEmployee(String employeeId) {
-        if (findEmployeeById(employeeId).getObject() == null) {
-            return new Response<>(null, Collections.singletonList("Can't delete nonexistent employee"));
-        }
-
-        String query = "DELETE FROM employee WHERE id_employee = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, employeeId);
-
-            int rows = statement.executeUpdate();
-            if (rows == 0) {
-                return new Response<>(null, Collections.singletonList("Failed to delete employee"));
-            }
-
-            return new Response<>(null, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
@@ -170,30 +181,25 @@ public class EmployeeService {
         }
     }
 
-    private Employee employeeFromResultSet(ResultSet resultSet) throws SQLException {
-        return new Employee(
-                resultSet.getString("id_employee"),
-                resultSet.getString("empl_surname"),
-                resultSet.getString("empl_name"),
-                resultSet.getString("empl_patronymic"),
-                resultSet.getString("empl_role"),
-                resultSet.getDouble("salary"),
-                resultSet.getDate("date_of_birth").toLocalDate(),
-                resultSet.getDate("date_of_start").toLocalDate(),
-                resultSet.getString("phone_number"),
-                resultSet.getString("city"),
-                resultSet.getString("street"),
-                resultSet.getString("zip_code")
-        );
-    }
+    public Response<Employee> deleteEmployee(String employeeId) {
+        if (findEmployeeById(employeeId).getObject() == null) {
+            return new Response<>(null, Collections.singletonList("Can't delete nonexistent employee"));
+        }
 
-    private EmployeeInfo employeeInfoFromResultSet(ResultSet resultSet) throws SQLException {
-        return new EmployeeInfo(
-                resultSet.getString("phone_number"),
-                resultSet.getString("city"),
-                resultSet.getString("street"),
-                resultSet.getString("zip_code")
-        );
+        String query = "DELETE FROM employee WHERE id_employee = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, employeeId);
+
+            int rows = statement.executeUpdate();
+            if (rows == 0) {
+                return new Response<>(null, Collections.singletonList("Failed to delete employee"));
+            }
+
+            return new Response<>(null, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
     }
 
     public Response<List<Employee>> findAllEmployees() {
@@ -268,11 +274,5 @@ public class EmployeeService {
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
-    }
-
-    private boolean isAtLeast18YearsOld(LocalDate birthDate) {
-        LocalDate today = LocalDate.now();
-        Period period = Period.between(birthDate, today);
-        return period.getYears() >= 18;
     }
 }

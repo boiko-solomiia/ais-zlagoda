@@ -13,12 +13,11 @@ import java.util.List;
 public class ProductService {
 
     private final Connection connection;
-    private final CategoryService categoryService;
 
-    public ProductService(Connection connection, CategoryService categoryService) {
+    public ProductService(Connection connection) {
         this.connection = connection;
-        this.categoryService = categoryService;
     }
+
     private List<String> validateProduct(Product product) {
         List<String> errors = new LinkedList<>();
 
@@ -51,6 +50,40 @@ public class ProductService {
         );
     }
 
+    private Response<List<Product>> getListResponse(String query) {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<Product> products = new LinkedList<>();
+
+            while (resultSet.next()) {
+                products.add(productFromResultSet(resultSet));
+            }
+
+            return new Response<>(products, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private Response<List<Product>> getListResponse(String query, Object... params) {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (int i = 0; i < params.length; i++) {
+                statement.setObject(i + 1, params[i]);
+            }
+
+            ResultSet resultSet = statement.executeQuery();
+            List<Product> products = new LinkedList<>();
+
+            while (resultSet.next()) {
+                products.add(productFromResultSet(resultSet));
+            }
+
+            return new Response<>(products, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
     public Response<Product> createProduct(Product product) {
         List<String> errors = validateProduct(product);
         if (!errors.isEmpty()) {
@@ -78,78 +111,6 @@ public class ProductService {
             }
 
             return new Response<>(product, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-    public Response<List<Product>> findAll() {
-        String query = "SELECT * FROM product ORDER BY product_name ASC";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            ResultSet resultSet = statement.executeQuery();
-            List<Product> products = new LinkedList<>();
-
-            while (resultSet.next()) {
-                products.add(productFromResultSet(resultSet));
-            }
-
-            return new Response<>(products, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-    public Response<Product> findProductById(int productId) {
-        String query = "SELECT * FROM product WHERE product_id = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, productId);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                return new Response<>(productFromResultSet(resultSet), new LinkedList<>());
-            } else {
-                return new Response<>(null, Collections.singletonList("Product not found"));
-            }
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-    public Response<List<Product>> findProductsByCategory(int categoryNumber) {
-        String query = "SELECT * FROM product WHERE category_number = ? ORDER BY product_name ASC";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, categoryNumber);
-
-            ResultSet resultSet = statement.executeQuery();
-            List<Product> products = new LinkedList<>();
-
-            while (resultSet.next()) {
-                products.add(productFromResultSet(resultSet));
-            }
-
-            return new Response<>(products, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
-
-    public Response<List<Product>> findProductsByName(String productName) {
-        String query = "SELECT * FROM product WHERE product_name = ? ORDER BY product_name ASC";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, productName);
-
-            ResultSet resultSet = statement.executeQuery();
-            List<Product> products = new LinkedList<>();
-
-            while (resultSet.next()) {
-                products.add(productFromResultSet(resultSet));
-            }
-
-            return new Response<>(products, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
@@ -204,5 +165,37 @@ public class ProductService {
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
+    }
+
+    public Response<List<Product>> findAll() {
+        String query = "SELECT * FROM product ORDER BY product_name";
+        return getListResponse(query);
+    }
+
+    public Response<Product> findProductById(int productId) {
+        String query = "SELECT * FROM product WHERE product_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return new Response<>(productFromResultSet(resultSet), new LinkedList<>());
+            } else {
+                return new Response<>(null, Collections.singletonList("Product not found"));
+            }
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<List<Product>> findProductsByCategory(int categoryNumber) {
+        String query = "SELECT * FROM product WHERE category_number = ? ORDER BY product_name";
+        return getListResponse(query, categoryNumber);
+    }
+
+    public Response<List<Product>> findProductsByName(String productName) {
+        String query = "SELECT * FROM product WHERE product_name = ? ORDER BY product_name";
+        return getListResponse(query, productName);
     }
 }

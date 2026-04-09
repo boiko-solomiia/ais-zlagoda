@@ -95,7 +95,7 @@ public class CheckService {
         }
     }
 
-    public Response<Check> createCheckWithSales(Check check, List<SaleRequest> items) {
+    public Response<Check> createCheckWithSales(Check myCheck, List<SaleRequest> items) {
         try {
             connection.setAutoCommit(false);
             Response<Void> stockCheck = saleService.checkStockForSaleItems(items);
@@ -111,24 +111,26 @@ public class CheckService {
             }
 
             double total = totalResponse.getObject();
-            check.setSumTotal(total);
-            check.setVat(total * 0.2);
+            myCheck.setSumTotal(total);
+            myCheck.setVat(total * 0.2);
 
-            Response<Check> checkResponse = createCheck(check);
+            Response<Check> checkResponse = createCheck(myCheck);
             if (!checkResponse.getErrors().isEmpty()) {
                 connection.rollback();
                 return checkResponse;
             }
 
-            Response<Void> salesResponse = saleService.createSalesFromRequests(items, check.getCheckNumber());
+            Response<Void> salesResponse = saleService.createSalesFromRequests(items, myCheck.getCheckNumber());
             if (!salesResponse.getErrors().isEmpty()) {
                 connection.rollback();
                 return new Response<>(null, salesResponse.getErrors());
             }
             connection.commit();
-            return new Response<>(check, new LinkedList<>());
+            return new Response<>(myCheck, new LinkedList<>());
         } catch (SQLException e) {
-            try { connection.rollback(); } catch (SQLException ex) {}
+            try { connection.rollback(); } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         } finally {
             try { connection.setAutoCommit(true); } catch (SQLException e) {}
@@ -221,12 +223,6 @@ public class CheckService {
 
         try {
             connection.setAutoCommit(false);
-            Response<Void> deleteSales = saleService.deleteSalesByCheckNumber(checkNumber);
-            if (!deleteSales.getErrors().isEmpty()) {
-                connection.rollback();
-                return new Response<>(null, deleteSales.getErrors());
-            }
-
             String query = "DELETE FROM my_check WHERE check_number = ?";
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setString(1, checkNumber);
