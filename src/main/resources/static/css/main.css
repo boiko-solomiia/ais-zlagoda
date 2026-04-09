@@ -70,7 +70,7 @@ h2 {
 .login-page {
     font-family: var(--font-family), cursive;
     background-color: var(--secondary-light);
-    background-image: url('/static/images/login-back.jpg');
+    background-image: url('../images/login-back.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
