@@ -96,30 +96,43 @@ public class CheckService {
     }
 
     public Response<Check> createCheckWithSales(Check check, List<SaleRequest> items) {
-        Response<Void> stockCheck = saleService.checkStockForSaleItems(items);
-        if (!stockCheck.getErrors().isEmpty()) {
-            return new Response<>(null, stockCheck.getErrors());
-        }
+        try {
+            connection.setAutoCommit(false);
+            Response<Void> stockCheck = saleService.checkStockForSaleItems(items);
+            if (!stockCheck.getErrors().isEmpty()) {
+                connection.rollback();
+                return new Response<>(null, stockCheck.getErrors());
+            }
 
-        Response<Double> totalResponse = saleService.calculateTotalForSaleItems(items);
-        if (!totalResponse.getErrors().isEmpty()) {
-            return new Response<>(null, totalResponse.getErrors());
-        }
+            Response<Double> totalResponse = saleService.calculateTotalForSaleItems(items);
+            if (!totalResponse.getErrors().isEmpty()) {
+                connection.rollback();
+                return new Response<>(null, totalResponse.getErrors());
+            }
 
-        double total = totalResponse.getObject();
-        check.setSumTotal(total);
-        check.setVat(total * 0.2);
+            double total = totalResponse.getObject();
+            check.setSumTotal(total);
+            check.setVat(total * 0.2);
 
-        Response<Check> checkResponse = createCheck(check);
-        if (!checkResponse.getErrors().isEmpty()) {
-            return checkResponse;
-        }
+            Response<Check> checkResponse = createCheck(check);
+            if (!checkResponse.getErrors().isEmpty()) {
+                connection.rollback();
+                return checkResponse;
+            }
 
-        Response<Void> salesResponse = saleService.createSalesFromRequests(items, check.getCheckNumber());
-        if (!salesResponse.getErrors().isEmpty()) {
-            return new Response<>(null, salesResponse.getErrors());
+            Response<Void> salesResponse = saleService.createSalesFromRequests(items, check.getCheckNumber());
+            if (!salesResponse.getErrors().isEmpty()) {
+                connection.rollback();
+                return new Response<>(null, salesResponse.getErrors());
+            }
+            connection.commit();
+            return new Response<>(check, new LinkedList<>());
+        } catch (SQLException e) {
+            try { connection.rollback(); } catch (SQLException ex) {}
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        } finally {
+            try { connection.setAutoCommit(true); } catch (SQLException e) {}
         }
-        return new Response<>(check, new LinkedList<>());
     }
 
     public Response<List<Check>> findAll() {
@@ -206,24 +219,30 @@ public class CheckService {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent check"));
         }
 
-        Response<Void> deleteSales = saleService.deleteSalesByCheckNumber(checkNumber);
-        if (!deleteSales.getErrors().isEmpty()) {
-            return new Response<>(null, deleteSales.getErrors());
-        }
-
-        String query = "DELETE FROM my_check WHERE check_number = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, checkNumber);
-
-            int rows = statement.executeUpdate();
-            if (rows == 0) {
-                return new Response<>(null, Collections.singletonList("Failed to delete check"));
+        try {
+            connection.setAutoCommit(false);
+            Response<Void> deleteSales = saleService.deleteSalesByCheckNumber(checkNumber);
+            if (!deleteSales.getErrors().isEmpty()) {
+                connection.rollback();
+                return new Response<>(null, deleteSales.getErrors());
             }
 
+            String query = "DELETE FROM my_check WHERE check_number = ?";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, checkNumber);
+                int rows = statement.executeUpdate();
+                if (rows == 0) {
+                    connection.rollback();
+                    return new Response<>(null, Collections.singletonList("Failed to delete check"));
+                }
+            }
+            connection.commit();
             return new Response<>(null, new LinkedList<>());
         } catch (SQLException e) {
+            try { connection.rollback(); } catch (SQLException ex) {}
             return new Response<>(null, Collections.singletonList(e.getMessage()));
+        } finally {
+            try { connection.setAutoCommit(true); } catch (SQLException e) {}
         }
     }
 
