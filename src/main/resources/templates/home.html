@@ -2,15 +2,35 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Zlagoda</title>
 </head>
-<body>
-<h2>Welcome to AIS Zlagoda</h2>
+<body class="home-page">
+<div class="home-navigation-bar">
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
 
-<p>You are logged in.</p>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Logout</button>
-</form>
+<div class="center-content">
+     <img class="logo" src="/static/images/zlagoda-logo.png" alt="Zlagoda Logo" th:src="@{/static/images/zlagoda-logo.png}">
+</div>
 </body>
 </html>

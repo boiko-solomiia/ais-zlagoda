@@ -4,7 +4,7 @@
     --primary-light: #fa90a0;
     --primary-very-light: #fadbe0;
 
-    --secondary-color: #aecddd;
+    --secondary-color: rgba(174, 205, 221);
     --secondary-dark: #5b5f15;
     --secondary-light: #acae7f;
     --secondary-very-light: #dde0c3;
@@ -32,7 +32,7 @@
     --spacing-xl: 32px;
     --spacing-xxl: 48px;
 
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family: 'Times New Roman', Tahoma, Geneva, Verdana, sans-serif;
     --font-size-sm: 12px;
     --font-size-md: 14px;
     --font-size-lg: 16px;
@@ -160,4 +160,132 @@ h2 {
 .success-message {
     background-color: var(--secondary-very-light);
     color: var(--secondary-dark);
+}
+
+/*домашня сторінка*/
+.home-page {
+    font-family: var(--font-family), cursive;
+    /*background-image: url('/static/images/home-background.jpg');*/
+    background-color: var(--secondary-color);
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    position: relative;
+}
+
+.home-navigation-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--primary-color);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(110, 114, 84, 0.67);
+    z-index: 1000;
+    font-size: large;
+}
+
+.navigation-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.navigation-links a {
+    text-decoration: none;
+    color: var(--secondary-dark);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+}
+
+.navigation-links a:hover {
+    background-color: var(--primary-very-light);
+    color: var(--primary-dark);
+}
+
+.navigation-links a[href="/"] {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.account-menu {
+    position: relative;
+}
+
+.account-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.account-btn:hover {
+    background: var(--secondary-color);
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    min-width: 150px;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    z-index: 1;
+}
+
+.dropdown-menu a,
+.dropdown-menu .logout-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin: 0;
+    text-decoration: none;
+    color: var(--primary-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu .logout-btn:hover {
+    background-color: var(--primary-very-light);
+}
+
+.dropdown-menu .logout-btn {
+    color: var(--primary-dark);
+    font-size: 0.8rem;
+    font-family: inherit;
+}
+
+.account-menu:hover .dropdown-menu {
+    display: block;
+}
+
+.center-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.logo {
+    width: 200px;
+    height: auto;
 }
