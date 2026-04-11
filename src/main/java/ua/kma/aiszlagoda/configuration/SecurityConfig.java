@@ -13,29 +13,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // всі запити дозволені
+                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/manager/**").hasRole("MANAGER")
+                        .requestMatchers("/cashier/**").hasAnyRole("CASHIER", "MANAGER")
+                        .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable())
-                .formLogin(form -> form.disable());
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/static/**", "/static/images/**").permitAll()
-//                        .requestMatchers("/manager/**").hasRole("MANAGER")
-//                        .requestMatchers("/cashier/**").hasAnyRole("CASHIER", "MANAGER")
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .loginProcessingUrl("/login")
-//                        .defaultSuccessUrl("/", true)
-//                        .failureUrl("/login?error=true")
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout
-//                        .logoutUrl("/logout")
-//                        .logoutSuccessUrl("/login?logout=true")
-//                        .permitAll()
-//                )
-//                .csrf(Customizer.withDefaults());
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .permitAll()
+                )
+                .csrf(Customizer.withDefaults());
 
         return http.build();
     }
