@@ -1,41 +1,117 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
     <title>Products</title>
 </head>
-<body>
-<h2>Products</h2>
+<body class="products-page">
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/home">Home</a>
+        <a href="/">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
 
-<a th:href="@{/product/add}">Add product</a>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-<form th:action="@{/product/search}" method="get">
-    <input type="text" name="name" placeholder="Search by name">
-    <button type="submit">Search</button>
-</form>
-<p th:if="${searchName}">
-    Search results for: <b th:text="${searchName}"></b>
-</p>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Products</h1>
+    </div>
 
-<p th:if="${products != null and #lists.isEmpty(products)}">
-    No products found.
-</p>
-<ul>
-    <li th:each="product : ${products}">
-        <span th:text="${product.productName}"></span>
-        |
-        <span th:text="${product.manufacturer}"></span>
-        |
-        <span th:text="${product.characteristics}"></span>
-        |
-        category:
-        <span th:text="${product.categoryNumber}"></span>
+    <div class="action-bar">
+        <div class="filters">
+            <form th:action="@{/product/filter}" method="get" class="category-filter">
+                <div class="select-wrapper">
+                    <select name="categoryNumber" class="category-select"
+                            onchange="this.form.submit()">
+                        <option value="">All categories</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.categoryNumber}"
+                                th:text="${cat.categoryName}"
+                                th:selected="${selectedCategory != null and selectedCategory == cat.categoryNumber}">
+                        </option>
+                    </select>
+                    <span class="select-arrow">&#8964;</span>
+                </div>
+            </form>
 
-        <a th:href="@{/product/edit/{id}(id=${product.productId})}">Edit</a>
+            <form th:action="@{/product/search}" method="get" class="search-form">
+                <label>
+                    <input type="text" name="name" placeholder="Search by name..."
+                           class="search-input" th:value="${searchName}">
+                </label>
+                <button type="submit" class="btn btn-secondary">Search</button>
+                <a th:if="${searchName}" th:href="@{/product}" class="btn btn-sort">Clear</a>
+            </form>
+        </div>
 
-        <form th:action="@{/product/delete/{id}(id=${product.productId})}" method="post" style="display:inline;">
-            <button type="submit">Delete</button>
-        </form>
-    </li>
-</ul>
+        <div class="action-right">
+            <a th:href="@{/product/add}" class="btn btn-primary">Add product</a>
+        </div>
+    </div>
+
+    <div class="active-filters">
+        <span th:if="${selectedCategory}" class="filter-badge">
+            Category: <b th:each="cat : ${categories}" th:if="${cat.categoryNumber == selectedCategory}"
+                         th:text="${cat.categoryName}"></b>
+            <a th:href="@{/product}" class="remove-filter">х</a>
+        </span>
+        <span th:if="${searchName}" class="filter-badge">
+            Search: <b th:text="${searchName}"></b>
+            <a th:href="@{/product}" class="remove-filter">х</a>
+        </span>
+    </div>
+
+    <div th:if="${products != null and #lists.isEmpty(products)}" class="empty-state">
+        <p>No products found.</p>
+        <a th:href="@{/product/add}" class="btn btn-primary">Add product</a>
+    </div>
+
+    <div th:unless="${products == null or #lists.isEmpty(products)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Manufacturer</th>
+                <th>Characteristics</th>
+                <th>Category</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.productName}"></td>
+                <td th:text="${product.manufacturer}"></td>
+                <td th:text="${product.characteristics}"></td>
+                <td th:text="${product.categoryNumber}"></td>
+                <td class="actions">
+                    <a th:href="@{/product/edit/{id}(id=${product.productId})}" class="btn-edit">Edit</a>
+                    <form th:action="@{/product/delete/{id}(id=${product.productId})}" method="post"
+                          class="inline-form">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

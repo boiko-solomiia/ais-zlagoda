@@ -103,12 +103,26 @@ public class CategoryService {
     public Response<List<Category>> findAll() {
         String query = "SELECT * FROM category ORDER BY category_name";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            ResultSet resultSet = statement.executeQuery();
-            List<Category> categories = new LinkedList<>();
-            while (resultSet.next()) {
-                categories.add(categoryFromResultSet(resultSet));
-            }
-            return new Response<>(categories, new LinkedList<>());
+            return getListResponse(statement);
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private Response<List<Category>> getListResponse(PreparedStatement statement) throws SQLException {
+        ResultSet resultSet = statement.executeQuery();
+        List<Category> categories = new LinkedList<>();
+        while (resultSet.next()) {
+            categories.add(categoryFromResultSet(resultSet));
+        }
+        return new Response<>(categories, new LinkedList<>());
+    }
+
+    public Response<List<Category>> findCategoriesByName(String categoryName) {
+        String query = "SELECT * FROM category WHERE category_name = ? ORDER BY category_name";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, categoryName);
+            return getListResponse(statement);
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }

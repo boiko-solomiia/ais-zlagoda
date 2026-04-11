@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StoreProductInfo {
+    private String upc;
     private String productName;
     private String characteristics;
     private Double sellingPrice;

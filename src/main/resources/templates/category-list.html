@@ -1,23 +1,77 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <title>Categories</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Categories</title>
 </head>
-<body>
-<h2>Categories</h2>
+<body class="categories-page">
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/home">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
 
-<a th:href="@{/category/add}">Add category</a>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-<ul>
-  <li th:each="cat : ${categories}">
-    <span th:text="${cat.categoryName}"></span>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Categories</h1>
+    </div>
 
-    <a th:href="@{/category/edit/{id}(id=${cat.categoryNumber})}">Edit</a>
+    <div class="action-bar">
+        <div class="filters">
+            <form th:action="@{/category/search}" method="get" class="search-form">
+                <label>
+                    <input type="text" name="name" th:value="${searchName}"
+                           placeholder="Search by name" class="search-input">
+                </label>
+                <button type="submit" class="btn btn-secondary">Search</button>
+                <a th:if="${searchName}" th:href="@{/category}" class="btn btn-sort">Clear</a>
+            </form>
+        </div>
 
-    <form th:action="@{/category/delete/{id}(id=${cat.categoryNumber})}" method="post" style="display:inline;">
-      <button type="submit">Delete</button>
-    </form>
-  </li>
-</ul>
-</body>
-</html>
+        <div class="action-right">
+            <a th:href="@{/category/add}" class="btn btn-primary">Add category</a>
+        </div>
+    </div>
+
+    <div class="active-filters">
+        <span th:if="${searchName}" class="filter-badge">
+            Search: <b th:text="${searchName}"></b>
+            <a th:href="@{/category}" class="remove-filter">х</a>
+        </span>
+    </div>
+
+    <div th:if="${categories == null or #lists.isEmpty(categories)}" class="empty-state">
+        <p>No categories found.</p>
+        <a th:href="@{/category/add}" class="btn btn-primary">Add category</a>
+    </div>
+
+    <div th:unless="${categories == null or #lists.isEmpty(categories)}" class="category-grid">
+        <div th:each="cat : ${categories}" class="category-card">
+            <span class="category-name" th:text="${cat.categoryName}"></span>
+            <div class="category-actions">
+                <a th:href="@{/category/edit/{id}(id=${cat.categoryNumber})}" class="btn-edit">Edit</a>
+                <form th:action="@{/category/delete/{id}(id=${cat.categoryNumber})}" method="post" class="inline-form">
+                    <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

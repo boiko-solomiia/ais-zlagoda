@@ -114,6 +114,7 @@ public class StoreProductController {
         }
 
         model.addAttribute("storeProductInfo", response.getObject());
+        model.addAttribute("searchUpc", upc);
         return "store-product-info";
     }
 
@@ -140,6 +141,50 @@ public class StoreProductController {
         }
 
         model.addAttribute("storeProducts", response.getObject());
+        return "store-product-list";
+    }
+
+    @GetMapping("/sort")
+    public String getStoreProductsSorted(
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(required = false) String filter,
+            Model model) {
+
+        Response<List<StoreProductInfo>> response;
+        String filterType;
+
+        if ("promotional".equals(filter)) {
+            if ("quantity".equals(sortBy)) {
+                response = storeProductService.findPromotionalProductsSortedByQuantity();
+            } else {
+                response = storeProductService.findPromotionalProductsSortedByName();
+            }
+            filterType = "promotional";
+        } else if ("non-promotional".equals(filter)) {
+            if ("quantity".equals(sortBy)) {
+                response = storeProductService.findNonPromotionalProductsSortedByQuantity();
+            } else {
+                response = storeProductService.findNonPromotionalProductsSortedByName();
+            }
+            filterType = "non-promotional";
+        } else {
+            if ("quantity".equals(sortBy)) {
+                response = storeProductService.findAllStoreProductsSortedByQuantity();
+            } else {
+                response = storeProductService.findAllStoreProductsSortedByName();
+            }
+            filterType = null;
+        }
+
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+
+        model.addAttribute("storeProducts", response.getObject());
+        model.addAttribute("currentSort", sortBy);
+        model.addAttribute("filterType", filterType);
+
         return "store-product-list";
     }
 }

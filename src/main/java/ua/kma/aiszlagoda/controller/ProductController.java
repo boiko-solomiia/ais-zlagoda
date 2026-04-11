@@ -32,7 +32,9 @@ public class ProductController {
             return "error-page";
         }
 
+        Response<List<Category>> categoriesResponse = categoryService.findAll();
         model.addAttribute("products", response.getObject());
+        model.addAttribute("categories", categoriesResponse.getObject());
         return "product-list";
     }
 
@@ -110,21 +112,28 @@ public class ProductController {
             return "error-page";
         }
 
+        Response<List<Category>> categoriesResponse = categoryService.findAll();
         model.addAttribute("products", response.getObject());
+        model.addAttribute("categories", categoriesResponse.getObject());
         model.addAttribute("searchName", name);
         return "product-list";
     }
 
-    @GetMapping("/category/{categoryNumber}")
-    public String getProductsByCategory(@PathVariable int categoryNumber, Model model) {
-        Response<List<Product>> response = productService.findProductsByCategory(categoryNumber);
+    @GetMapping("/filter")
+    public String getProductsByCategory(@RequestParam(required = false) Integer categoryNumber, Model model) {
+        Response<List<Product>> response = categoryNumber != null
+                ? productService.findProductsByCategory(categoryNumber)
+                : productService.findAll();
 
         if (!response.getErrors().isEmpty()) {
             model.addAttribute("errors", response.getErrors());
             return "error-page";
         }
 
+        Response<List<Category>> categoriesResponse = categoryService.findAll();
         model.addAttribute("products", response.getObject());
+        model.addAttribute("categories", categoriesResponse.getObject());
+        model.addAttribute("selectedCategory", categoryNumber);
         return "product-list";
     }
 }

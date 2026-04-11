@@ -62,6 +62,7 @@ public class StoreProductService {
 
     private StoreProductInfo storeProductInfoFromResultSet(ResultSet resultSet) throws SQLException {
         return new StoreProductInfo(
+                resultSet.getString("upc"),
                 resultSet.getString("product_name"),
                 resultSet.getString("characteristics"),
                 resultSet.getDouble("selling_price"),
@@ -307,7 +308,8 @@ public class StoreProductService {
 
     public Response<StoreProductInfo> findStoreProductInfoByUPC(String upc) {
         String query = """
-                SELECT p.product_name,
+                SELECT sp.upc,
+                       p.product_name,
                        p.characteristics,
                        sp.selling_price,
                        sp.products_number
@@ -323,7 +325,7 @@ public class StoreProductService {
             if (resultSet.next()) {
                 return new Response<>(storeProductInfoFromResultSet(resultSet), new LinkedList<>());
             } else {
-                return new Response<>(null, Collections.singletonList("Store product info not found"));
+                return new Response<>(null, new LinkedList<>());
             }
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
@@ -332,21 +334,38 @@ public class StoreProductService {
 
     public Response<List<StoreProductInfo>> findAllStoreProductsSortedByName() {
         String query = """
-                SELECT p.product_name,
+                SELECT sp.upc,
+                       p.product_name,
                        p.characteristics,
                        sp.selling_price,
-                       sp.products_number
+                       sp.products_number,
+                       sp.promotional_product
                 FROM store_product sp
                 JOIN product p ON sp.product_id = p.product_id
-                ORDER BY p.product_name
+                ORDER BY p.product_name ASC
                 """;
 
         return getListResponse(query);
     }
 
+    public Response<List<StoreProductInfo>> findAllStoreProductsSortedByQuantity() {
+        String query = """
+        SELECT sp.upc,
+               p.product_name,
+               p.characteristics,
+               sp.selling_price,
+               sp.products_number
+        FROM store_product sp
+        JOIN product p ON sp.product_id = p.product_id
+        ORDER BY sp.products_number ASC
+        """;
+        return getListResponse(query);
+    }
+
     public Response<List<StoreProductInfo>> findPromotionalProductsSortedByName() {
         String query = """
-                SELECT p.product_name,
+                SELECT sp.upc,
+                       p.product_name,
                        p.characteristics,
                        sp.selling_price,
                        sp.products_number
@@ -361,7 +380,8 @@ public class StoreProductService {
 
     public Response<List<StoreProductInfo>> findNonPromotionalProductsSortedByName() {
         String query = """
-                SELECT p.product_name,
+                SELECT sp.upc,
+                       p.product_name,
                        p.characteristics,
                        sp.selling_price,
                        sp.products_number
@@ -376,7 +396,8 @@ public class StoreProductService {
 
     public Response<List<StoreProductInfo>> findPromotionalProductsSortedByQuantity() {
         String query = """
-                SELECT p.product_name,
+                SELECT sp.upc,
+                       p.product_name,
                        p.characteristics,
                        sp.selling_price,
                        sp.products_number
@@ -391,7 +412,8 @@ public class StoreProductService {
 
     public Response<List<StoreProductInfo>> findNonPromotionalProductsSortedByQuantity() {
         String query = """
-                SELECT p.product_name,
+                SELECT sp.upc,
+                       p.product_name,
                        p.characteristics,
                        sp.selling_price,
                        sp.products_number

@@ -95,4 +95,18 @@ public class CategoryController {
 
         return "redirect:/category";
     }
+
+    @GetMapping("/search")
+    public String searchProductsByName(@RequestParam String name, Model model) {
+        Response<List<Category>> response = categoryService.findCategoriesByName(name);
+
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+
+        model.addAttribute("categories", response.getObject());
+        model.addAttribute("searchName", name);
+        return "category-list";
+    }
 }

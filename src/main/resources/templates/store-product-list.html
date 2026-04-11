@@ -1,35 +1,114 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
     <title>Store products</title>
 </head>
-<body>
-<h2>Store Products</h2>
+<body class="store-products-page">
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/home">Home</a>
+        <a href="/product">Products</a>
+        <a href="/">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
 
-<a th:href="@{/store-product/add}">Add store product</a>
-<br><br>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-<a th:href="@{/store-product/promotional}">Promotional products</a>
-<br>
-<a th:href="@{/store-product/non-promotional}">Non-promotional products</a>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Store Products</h1>
+    </div>
 
-<form th:action="@{/store-product/search}" method="get">
-    <input type="text" name="upc" placeholder="Search by UPC">
-    <button type="submit">Search</button>
-</form>
+    <div class="action-bar">
+        <div class="filters">
 
-<ul>
-    <li th:each="sp : ${storeProducts}">
-        <span th:text="${sp.productName}"></span>
-        |
-        <span th:text="${sp.characteristics}"></span>
-        |
-        price:
-        <span th:text="${sp.sellingPrice}"></span>
-        |
-        quantity:
-        <span th:text="${sp.productsNumber}"></span>
-    </li>
-</ul>
+            <div class="filter-group">
+                <a th:href="@{/store-product/sort(sortBy=${currentSort ?: 'name'})}"
+                   th:classappend="${filterType == null} ? ' active' : ''"
+                   class="filter-btn">All</a>
+                <a th:href="@{/store-product/sort(sortBy=${currentSort ?: 'name'}, filter='promotional')}"
+                   th:classappend="${filterType == 'promotional'} ? ' active' : ''"
+                   class="filter-btn">Promotional</a>
+                <a th:href="@{/store-product/sort(sortBy=${currentSort ?: 'name'}, filter='non-promotional')}"
+                   th:classappend="${filterType == 'non-promotional'} ? ' active' : ''"
+                   class="filter-btn">Non-promotional</a>
+            </div>
+
+            <a th:if="${currentSort == 'quantity'}"
+               th:href="@{/store-product/sort(sortBy='name', filter=${filterType})}"
+               class="btn btn-sort">
+                Sort by name ↑
+            </a>
+            <a th:unless="${currentSort == 'quantity'}"
+               th:href="@{/store-product/sort(sortBy='quantity', filter=${filterType})}"
+               class="btn btn-sort">
+                Sort by quantity ↑
+            </a>
+
+            <form th:action="@{/store-product/search}" method="get" class="search-form">
+                <label>
+                    <input type="text" name="upc" placeholder="Search by UPC" class="search-input">
+                </label>
+                <button type="submit" class="btn btn-secondary">Search</button>
+            </form>
+        </div>
+
+        <div class="action-right">
+            <a th:href="@{/store-product/add}" class="btn btn-primary">Add store product</a>
+        </div>
+    </div>
+
+    <div th:if="${upc}" class="search-info">
+        Results for: <strong th:text="${upc}"></strong>
+    </div>
+
+    <div th:if="${storeProducts == null or #lists.isEmpty(storeProducts)}" class="empty-state">
+        <p>No store products found.</p>
+        <a th:href="@{/store-product/add}" class="btn btn-primary">Add store product</a>
+    </div>
+
+    <div th:unless="${storeProducts == null or #lists.isEmpty(storeProducts)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Characteristics</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="storeProduct : ${storeProducts}">
+                <td th:text="${storeProduct.productName}"></td>
+                <td th:text="${storeProduct.characteristics}"></td>
+                <td th:text="${storeProduct.sellingPrice}"></td>
+                <td th:text="${storeProduct.productsNumber}"></td>
+                <td class="actions">
+                    <a th:href="@{/store-product/edit/{upc}(upc=${storeProduct.upc})}" class="btn-edit">Edit</a>
+                    <form th:action="@{/store-product/delete/{upc}(upc=${storeProduct.upc})}" method="post" class="inline-form">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

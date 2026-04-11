@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS store_product (
     FOREIGN KEY (product_id) REFERENCES product(product_id)
     ON DELETE NO ACTION
     ON UPDATE CASCADE
-
 );
 
 
