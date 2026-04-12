@@ -103,9 +103,11 @@ public class CustomerCardController {
         return "customer-card-list";
     }
 
-    @GetMapping("/percent/{percent}")
-    public String getCustomerCardsByPercent(@PathVariable int percent, Model model) {
-        Response<List<CustomerCard>> response = customerCardService.findCustomerCardsByPercent(percent);
+    @GetMapping("/filter")
+    public String filterByPercent(@RequestParam(required = false) Integer percent, Model model) {
+        Response<List<CustomerCard>> response = percent != null
+                ? customerCardService.findCustomerCardsByPercent(percent)
+                : customerCardService.findAll();
 
         if (!response.getErrors().isEmpty()) {
             model.addAttribute("errors", response.getErrors());

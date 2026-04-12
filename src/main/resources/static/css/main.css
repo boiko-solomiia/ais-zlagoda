@@ -638,3 +638,28 @@ h2 {
     gap: 0.4rem;
     justify-content: center;
 }
+
+.percent-input-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.percent-input {
+    padding-right: 1.8rem;
+    width: 180px;
+}
+
+.percent-sign {
+    position: absolute;
+    right: 0.65rem;
+    font-size: 0.9rem;
+    color: var(--secondary-light);
+    pointer-events: none;
+    font-weight: 600;
+}
+
+input[type=number].percent-input::-webkit-inner-spin-button,
+input[type=number].percent-input::-webkit-outer-spin-button {
+    opacity: 0.4;
+}

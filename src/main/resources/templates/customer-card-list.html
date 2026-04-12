@@ -9,12 +9,12 @@
 <body class="customer-cards-page">
 <div class="navigation-bar">
     <div class="navigation-links">
-        <a href="/">Home</a>
+        <a href="/home">Home</a>
         <a href="/product">Products</a>
         <a href="/store-product">Store Products</a>
         <a href="/category">Categories</a>
         <a href="/employee">Employees</a>
-        <a href="/customer-card" class="active">Customer Cards</a>
+        <a href="/customer-card">Customer Cards</a>
         <a href="/check">Checks</a>
     </div>
 
@@ -28,41 +28,87 @@
         </div>
     </div>
 </div>
-<h2>Customer Cards</h2>
 
-<a th:href="@{/customer-card/add}">Add customer card</a>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Customer Cards</h1>
+    </div>
 
-<form th:action="@{/customer-card/search}" method="get">
-    <input type="text" name="surname" placeholder="Search by surname">
-    <button type="submit">Search</button>
-</form>
+    <div class="action-bar">
+        <div class="filters">
+            <form th:action="@{/customer-card/search}" method="get" class="search-form">
+                <label>
+                    <input type="text" name="surname" placeholder="Search by surname"
+                           class="search-input" th:value="${searchSurname}">
+                </label>
+                <button type="submit" class="btn btn-secondary">Search</button>
+                <a th:if="${searchSurname}" th:href="@{/customer-card}" class="btn btn-sort">Clear</a>
+            </form>
 
-<p th:if="${searchSurname}">
-    Search results for surname: <b th:text="${searchSurname}"></b>
-</p>
+            <form th:action="@{/customer-card/filter}" method="get" class="search-form">
+                <div class="percent-input-wrapper">
+                    <label>
+                        <input type="number" name="percent" placeholder="Filter by % discount"
+                               class="search-input percent-input" min="0" max="100"
+                               th:value="${selectedPercent}">
+                    </label>
+                    <span class="percent-sign">%</span>
+                </div>
+                <button type="submit" class="btn btn-secondary">Filter</button>
+                <a th:if="${selectedPercent}" th:href="@{/customer-card}" class="btn btn-sort">Clear</a>
+            </form>
 
-<p th:if="${selectedPercent}">
-    Customer cards with percent: <b th:text="${selectedPercent}"></b>
-</p>
+        </div>
 
-<ul>
-    <li th:each="card : ${customerCards}">
-        <span th:text="${card.cardNumber}"></span>
-        |
-        <span th:text="${card.custSurname}"></span>
-        <span th:text="${card.custName}"></span>
-        <span th:text="${card.custPatronymic}"></span>
-        |
-        <span th:text="${card.phoneNumber}"></span>
-        |
-        <span th:text="${card.percent}"></span>%
+        <div class="action-right">
+            <a th:href="@{/customer-card/add}" class="btn btn-primary">Add customer card</a>
+        </div>
+    </div>
 
-        <a th:href="@{/customer-card/edit/{cardNumber}(cardNumber=${card.cardNumber})}">Edit</a>
+    <div class="active-filters">
+        <span th:if="${searchSurname}" class="filter-badge">
+            Surname: <b th:text="${searchSurname}"></b>
+            <a th:href="@{/customer-card}" class="remove-filter">×</a>
+        </span>
+        <span th:if="${selectedPercent}" class="filter-badge">
+            Discount: <b th:text="${selectedPercent} + '%'"></b>
+            <a th:href="@{/customer-card}" class="remove-filter">×</a>
+        </span>
+    </div>
 
-        <form th:action="@{/customer-card/delete/{cardNumber}(cardNumber=${card.cardNumber})}" method="post" style="display:inline;">
-            <button type="submit">Delete</button>
-        </form>
-    </li>
-</ul>
+    <div th:if="${customerCards == null or #lists.isEmpty(customerCards)}" class="empty-state">
+        <p>No customer cards found.</p>
+        <a th:if="${searchSurname or selectedPercent}" th:href="@{/customer-card}" class="btn btn-sort" style="margin-top: 0.5rem;">Clear filters</a>
+        <a th:unless="${searchSurname or selectedPercent}" th:href="@{/customer-card/add}" class="btn btn-primary">Add customer card</a>
+    </div>
+
+    <div th:unless="${customerCards == null or #lists.isEmpty(customerCards)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Card number</th>
+                <th>Full name</th>
+                <th>Phone number</th>
+                <th>Discount</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="card : ${customerCards}">
+                <td th:text="${card.cardNumber}"></td>
+                <td th:text="${card.custSurname + ' ' + card.custName + ' ' + (card.custPatronymic != null ? card.custPatronymic : '')}"></td>
+                <td th:text="${card.phoneNumber}"></td>
+                <td th:text="${card.percent + '%'}"></td>
+                <td class="actions">
+                    <a th:href="@{/customer-card/edit/{cardNumber}(cardNumber=${card.cardNumber})}" class="btn-edit">Edit</a>
+                    <form th:action="@{/customer-card/delete/{cardNumber}(cardNumber=${card.cardNumber})}" method="post" class="inline-form">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>
