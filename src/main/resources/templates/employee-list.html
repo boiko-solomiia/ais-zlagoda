@@ -1,74 +1,150 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" th:href="@{/css/main.css}">
-  <title>Employees</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Employees</title>
 </head>
-<body>
+<body class="employees-page">
 <div class="navigation-bar">
-  <div class="navigation-links">
-    <a href="/">Home</a>
-    <a href="/product">Products</a>
-    <a href="/store-product">Store Products</a>
-    <a href="/category">Categories</a>
-    <a href="/employee" class="active">Employees</a>
-    <a href="/customer-card">Customer Cards</a>
-    <a href="/check">Checks</a>
-  </div>
-
-  <div class="account-menu">
-    <button class="account-btn">👤</button>
-    <div class="dropdown-menu">
-      <a href="/profile">My Profile</a>
-      <form th:action="@{/logout}" method="post" style="margin: 0;">
-        <button class="logout-btn" type="submit">Log Out</button>
-      </form>
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee" class="active">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
     </div>
-  </div>
+
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
 </div>
-<h2>Employees</h2>
 
-<a th:href="@{/employee/add}">Add employee</a>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Employees</h1>
+    </div>
 
-<form th:action="@{/employee/search}" method="get">
-  <input type="text" name="surname" placeholder="Search by surname">
-  <button type="submit">Search</button>
-</form>
+    <div class="action-bar">
+        <div class="filters">
 
-<p th:if="${searchSurname}">
-  Search results for surname: <b th:text="${searchSurname}"></b>
-</p>
+            <div class="filter-group">
+                <a th:href="@{/employee}"
+                   th:classappend="${selectedRole == null} ? ' active' : ''"
+                   class="filter-btn">All</a>
+                <a th:href="@{/employee/filter(role='cashier')}"
+                   th:classappend="${selectedRole == 'cashier'} ? ' active' : ''"
+                   class="filter-btn">Cashiers</a>
+            </div>
 
-<ul>
-  <li th:each="employee : ${employees}">
-    <span th:text="${employee.idEmployee}"></span>
-    |
-    <span th:text="${employee.emplSurname}"></span>
-    <span th:text="${employee.emplName}"></span>
-    <span th:text="${employee.emplPatronymic}"></span>
-    |
-    <span th:text="${employee.emplRole}"></span>
-    |
-    <span th:text="${employee.salary}"></span>грн
-    |
-    <span th:text="${employee.dateOfBirth}"></span>
-    |
-    <span th:text="${employee.dateOfStart}"></span>
-    |
-    <span th:text="${employee.city}"></span>
-    |
-    <span th:text="${employee.street}"></span>
-    |
-    <span th:text="${employee.zipCode}"></span>
+            <form th:action="@{/employee/search}" method="get" class="search-form">
+                <label>
+                    <input type="text" name="surname" placeholder="Search by surname"
+                           class="search-input" th:value="${searchSurname}">
+                </label>
+                <button type="submit" class="btn btn-secondary">Search</button>
+                <a th:if="${searchSurname != null}" th:href="@{/employee}" class="btn btn-sort">Clear</a>
+            </form>
+        </div>
 
-    <a th:href="@{/employee/edit/{idEmployee}(idEmployee=${employee.idEmployee})}">Edit</a>
+        <div class="action-right">
+            <a th:href="@{/employee/add}" class="btn btn-primary">Add employee</a>
+        </div>
+    </div>
 
-    <form th:action="@{/employee/delete/{idEmployee}(idEmployee=${employee.idEmployee})}" method="post" style="display:inline;">
-      <button type="submit">Delete</button>
-    </form>
-  </li>
-</ul>
+    <div class="active-filters">
+        <span th:if="${searchSurname}" class="filter-badge">
+            Search: <b th:text="${searchSurname}"></b>
+            <a th:href="@{/employee}" class="remove-filter">х</a>
+        </span>
+    </div>
+
+    <div th:if="${searchSurname != null}" class="search-results-block">
+        <div th:if="${searchResults == null or #lists.isEmpty(searchResults)}" class="empty-state" style="padding: 1rem 1.5rem;">
+            <p>No employees found.</p>
+            <a th:href="@{/employee/add}" class="btn btn-primary">Add employee</a>
+        </div>
+
+        <div th:unless="${searchResults == null or #lists.isEmpty(searchResults)}" class="search-cards">
+            <div th:each="info : ${searchResults}" class="info-card-row">
+                <div class="info-chip chip-name">
+                    <span class="chip-label">Employee</span>
+                    <span class="chip-value" th:text="${info.emplSurname + ' ' + info.emplName}"></span>
+                    <span class="chip-id" th:text="'ID: ' + ${info.idEmployee}"></span>
+                </div>
+                <div class="info-chip">
+                    <span class="chip-label">Phone</span>
+                    <span class="chip-value" th:text="${info.phoneNumber}"></span>
+                </div>
+                <div class="info-chip">
+                    <span class="chip-label">City</span>
+                    <span class="chip-value" th:text="${info.city}"></span>
+                </div>
+                <div class="info-chip">
+                    <span class="chip-label">Street</span>
+                    <span class="chip-value" th:text="${info.street}"></span>
+                </div>
+                <div class="info-chip">
+                    <span class="chip-label">ZIP</span>
+                    <span class="chip-value" th:text="${info.zipCode}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:unless="${searchSurname != null}">
+        <div th:if="${employees == null or #lists.isEmpty(employees)}" class="empty-state">
+            <p>No employees found.</p>
+            <a th:href="@{/employee/add}" class="btn btn-primary">Add employee</a>
+        </div>
+
+        <div th:unless="${employees == null or #lists.isEmpty(employees)}" class="table-container">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full name</th>
+                    <th>Role</th>
+                    <th>Salary</th>
+                    <th>Date of birth</th>
+                    <th>Date of start</th>
+                    <th>City</th>
+                    <th>Street</th>
+                    <th>ZIP</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="employee : ${employees}">
+                    <td th:text="${employee.idEmployee}"></td>
+                    <td th:text="${employee.emplSurname + ' ' + employee.emplName + ' ' + (employee.emplPatronymic != null ? employee.emplPatronymic : '')}"></td>
+                    <td th:text="${employee.emplRole}"></td>
+                    <td th:text="${employee.salary + ' грн'}"></td>
+                    <td th:text="${employee.dateOfBirth}"></td>
+                    <td th:text="${employee.dateOfStart}"></td>
+                    <td th:text="${employee.city}"></td>
+                    <td th:text="${employee.street}"></td>
+                    <td th:text="${employee.zipCode}"></td>
+                    <td class="actions">
+                        <a th:href="@{/employee/edit/{id}(id=${employee.idEmployee})}" class="btn-edit">Edit</a>
+                        <form th:action="@{/employee/delete/{id}(id=${employee.idEmployee})}" method="post" class="inline-form">
+                            <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 </body>
 </html>

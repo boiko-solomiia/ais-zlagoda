@@ -38,15 +38,17 @@
         <div class="filters">
             <form th:action="@{/product/filter}" method="get" class="category-filter">
                 <div class="select-wrapper">
-                    <select name="categoryNumber" class="category-select"
-                            onchange="this.form.submit()">
-                        <option value="">All categories</option>
-                        <option th:each="cat : ${categories}"
-                                th:value="${cat.categoryNumber}"
-                                th:text="${cat.categoryName}"
-                                th:selected="${selectedCategory != null and selectedCategory == cat.categoryNumber}">
-                        </option>
-                    </select>
+                    <label>
+                        <select name="categoryNumber" class="category-select"
+                                onchange="this.form.submit()">
+                            <option value="">All categories</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.categoryNumber}"
+                                    th:text="${cat.categoryName}"
+                                    th:selected="${selectedCategory != null and selectedCategory == cat.categoryNumber}">
+                            </option>
+                        </select>
+                    </label>
                     <span class="select-arrow">&#8964;</span>
                 </div>
             </form>

@@ -92,19 +92,31 @@ public class EmployeeController {
 
     @GetMapping("/search")
     public String searchEmployeesBySurname(@RequestParam String surname, Model model) {
-        Response<List<Employee>> allEmployees = employeeService.findAllEmployees();
-
         Response<List<EmployeeInfo>> searchResponse = employeeService.findPhoneAndAddressBySurname(surname);
 
-        if (!allEmployees.getErrors().isEmpty()) {
-            model.addAttribute("errors", allEmployees.getErrors());
+        if (!searchResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", searchResponse.getErrors());
             return "error-page";
         }
 
-        model.addAttribute("employees", allEmployees.getObject());
         model.addAttribute("searchResults", searchResponse.getObject());
         model.addAttribute("searchSurname", surname);
+        return "employee-list";
+    }
 
+    @GetMapping("/filter")
+    public String filterByRole(@RequestParam(required = false) String role, Model model) {
+        Response<List<Employee>> response = "cashier".equals(role)
+                ? employeeService.findAllCashiers()
+                : employeeService.findAllEmployees();
+
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+
+        model.addAttribute("employees", response.getObject());
+        model.addAttribute("selectedRole", role);
         return "employee-list";
     }
 }

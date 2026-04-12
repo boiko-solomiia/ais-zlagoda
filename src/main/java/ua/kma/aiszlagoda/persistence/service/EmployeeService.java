@@ -86,6 +86,17 @@ public class EmployeeService {
         return period.getYears() >= 18;
     }
 
+    private Response<List<Employee>> getListResponse(PreparedStatement statement) throws SQLException {
+        ResultSet resultSet = statement.executeQuery();
+        List<Employee> employees = new LinkedList<>();
+
+        while (resultSet.next()) {
+            employees.add(employeeFromResultSet(resultSet));
+        }
+
+        return new Response<>(employees, new LinkedList<>());
+    }
+
     private Employee employeeFromResultSet(ResultSet resultSet) throws SQLException {
         return new Employee(
                 resultSet.getString("id_employee"),
@@ -105,6 +116,9 @@ public class EmployeeService {
 
     private EmployeeInfo employeeInfoFromResultSet(ResultSet resultSet) throws SQLException {
         return new EmployeeInfo(
+                resultSet.getString("id_employee"),
+                resultSet.getString("empl_surname"),
+                resultSet.getString("empl_name"),
                 resultSet.getString("phone_number"),
                 resultSet.getString("city"),
                 resultSet.getString("street"),
@@ -206,14 +220,7 @@ public class EmployeeService {
         String query = "SELECT * FROM employee ORDER BY empl_surname";
 
         try(PreparedStatement statement = connection.prepareStatement(query)) {
-            ResultSet resultSet = statement.executeQuery();
-            List<Employee> employees = new LinkedList<>();
-
-            while (resultSet.next()) {
-                employees.add(employeeFromResultSet(resultSet));
-            }
-
-            return new Response<>(employees, new LinkedList<>());
+            return getListResponse(statement);
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
@@ -224,21 +231,14 @@ public class EmployeeService {
 
         try(PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, "касир");
-            ResultSet resultSet = statement.executeQuery();
-            List<Employee> employees = new LinkedList<>();
-
-            while (resultSet.next()) {
-                employees.add(employeeFromResultSet(resultSet));
-            }
-
-            return new Response<>(employees, new LinkedList<>());
+            return getListResponse(statement);
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
     }
 
     public Response<List<EmployeeInfo>> findPhoneAndAddressBySurname(String employeeSurname) {
-        String query = "SELECT phone_number, city, street, zip_code FROM employee WHERE empl_surname = ?";
+        String query = "SELECT id_employee, empl_surname, empl_name, phone_number, city, street, zip_code FROM employee WHERE empl_surname = ?";
 
         try(PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, employeeSurname);
@@ -247,10 +247,6 @@ public class EmployeeService {
 
             while (resultSet.next()) {
                 employeesInfo.add(employeeInfoFromResultSet(resultSet));
-            }
-
-            if (employeesInfo.isEmpty()) {
-                return new Response<>(null, Collections.singletonList("Employee with surname '" + employeeSurname + "' not found"));
             }
 
             return new Response<>(employeesInfo, new LinkedList<>());
