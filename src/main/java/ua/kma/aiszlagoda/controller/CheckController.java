@@ -7,6 +7,7 @@ import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.CheckService;
 import ua.kma.aiszlagoda.persistence.service.CustomerCardService;
 import ua.kma.aiszlagoda.persistence.service.EmployeeService;
+import ua.kma.aiszlagoda.persistence.service.SaleService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,11 +21,10 @@ public class CheckController {
     private final EmployeeService employeeService;
     private final CustomerCardService customerCardService;
 
-    private final ua.kma.aiszlagoda.persistence.service.SaleService saleService;
+    private final SaleService saleService;
 
     public CheckController(CheckService checkService, EmployeeService employeeService,
-                           CustomerCardService customerCardService,
-                           ua.kma.aiszlagoda.persistence.service.SaleService saleService) {
+                           CustomerCardService customerCardService, SaleService saleService) {
         this.checkService = checkService;
         this.employeeService = employeeService;
         this.customerCardService = customerCardService;

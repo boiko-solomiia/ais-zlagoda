@@ -1,42 +1,81 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
     <title>Edit product</title>
 </head>
-<body>
-<h2>Edit Product</h2>
+<body class="product-edit-page">
 
-<form th:action="@{/product/edit}" method="post" th:object="${product}">
-    <input type="hidden" th:field="*{productId}">
-
-    <label>Category:</label>
-    <select th:field="*{categoryNumber}">
-        <option th:each="cat : ${categories}"
-                th:value="${cat.categoryNumber}"
-                th:text="${cat.categoryName}">
-        </option>
-    </select>
-    <br><br>
-
-    <label>Product name:</label>
-    <input type="text" th:field="*{productName}">
-    <br><br>
-
-    <label>Manufacturer:</label>
-    <input type="text" th:field="*{manufacturer}">
-    <br><br>
-
-    <label>Characteristics:</label>
-    <input type="text" th:field="*{characteristics}">
-    <br><br>
-
-    <button type="submit">Update</button>
-</form>
-
-<div th:if="${errors}">
-    <p th:each="err : ${errors}" th:text="${err}"></p>
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product" class="active">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<a th:href="@{/product}">Back to products</a>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Edit Product</h1>
+    </div>
+
+    <div class="form-card">
+        <form th:action="@{/product/edit}" method="post" th:object="${product}">
+            <input type="hidden" th:field="*{productId}">
+
+            <div class="form-field">
+                <label class="form-label">Category</label>
+                <div class="select-wrapper">
+                    <select th:field="*{categoryNumber}" class="category-select form-control">
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.categoryNumber}"
+                                th:text="${cat.categoryName}">
+                        </option>
+                    </select>
+                    <span class="select-arrow">&#8964;</span>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Product name</label>
+                <input type="text" th:field="*{productName}" class="form-control">
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Manufacturer</label>
+                <input type="text" th:field="*{manufacturer}" class="form-control">
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Characteristics</label>
+                <textarea th:field="*{characteristics}" class="form-control form-textarea"></textarea>
+            </div>
+
+            <div th:if="${errors}" class="errors-block">
+                <p th:each="err : ${errors}" th:text="${err}"></p>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/product}" class="btn btn-sort">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
