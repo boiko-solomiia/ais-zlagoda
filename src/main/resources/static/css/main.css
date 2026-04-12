@@ -208,7 +208,7 @@ h2 {
     color: var(--primary-dark);
 }
 
-.navigation-links a[href="/"] {
+.navigation-links .active {
     background-color: var(--primary-light);
     color: var(--primary-dark);
 }

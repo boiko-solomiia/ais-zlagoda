@@ -1,9 +1,33 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
   <title>Employees</title>
 </head>
 <body>
+<div class="navigation-bar">
+  <div class="navigation-links">
+    <a href="/">Home</a>
+    <a href="/product">Products</a>
+    <a href="/store-product">Store Products</a>
+    <a href="/category">Categories</a>
+    <a href="/employee" class="active">Employees</a>
+    <a href="/customer-card">Customer Cards</a>
+    <a href="/check">Checks</a>
+  </div>
+
+  <div class="account-menu">
+    <button class="account-btn">👤</button>
+    <div class="dropdown-menu">
+      <a href="/profile">My Profile</a>
+      <form th:action="@{/logout}" method="post" style="margin: 0;">
+        <button class="logout-btn" type="submit">Log Out</button>
+      </form>
+    </div>
+  </div>
+</div>
 <h2>Employees</h2>
 
 <a th:href="@{/employee/add}">Add employee</a>
