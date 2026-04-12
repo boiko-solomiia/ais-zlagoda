@@ -9,12 +9,12 @@
 <body class="customer-cards-page">
 <div class="navigation-bar">
     <div class="navigation-links">
-        <a href="/home">Home</a>
+        <a href="/">Home</a>
         <a href="/product">Products</a>
         <a href="/store-product">Store Products</a>
         <a href="/category">Categories</a>
         <a href="/employee">Employees</a>
-        <a href="/customer-card">Customer Cards</a>
+        <a href="/customer-card" class="active">Customer Cards</a>
         <a href="/check">Checks</a>
     </div>
 
@@ -78,8 +78,7 @@
 
     <div th:if="${customerCards == null or #lists.isEmpty(customerCards)}" class="empty-state">
         <p>No customer cards found.</p>
-        <a th:if="${searchSurname or selectedPercent}" th:href="@{/customer-card}" class="btn btn-sort" style="margin-top: 0.5rem;">Clear filters</a>
-        <a th:unless="${searchSurname or selectedPercent}" th:href="@{/customer-card/add}" class="btn btn-primary">Add customer card</a>
+        <a th:href="@{/customer-card/add}" class="btn btn-primary">Add customer card</a>
     </div>
 
     <div th:unless="${customerCards == null or #lists.isEmpty(customerCards)}" class="table-container">
