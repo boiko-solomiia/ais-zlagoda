@@ -3,14 +3,13 @@ package ua.kma.aiszlagoda.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ua.kma.aiszlagoda.persistence.model.Check;
-import ua.kma.aiszlagoda.persistence.model.CustomerCard;
-import ua.kma.aiszlagoda.persistence.model.Employee;
-import ua.kma.aiszlagoda.persistence.model.Response;
+import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.CheckService;
 import ua.kma.aiszlagoda.persistence.service.CustomerCardService;
 import ua.kma.aiszlagoda.persistence.service.EmployeeService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -21,10 +20,15 @@ public class CheckController {
     private final EmployeeService employeeService;
     private final CustomerCardService customerCardService;
 
-    public CheckController(CheckService checkService,  EmployeeService employeeService, CustomerCardService customerCardService) {
+    private final ua.kma.aiszlagoda.persistence.service.SaleService saleService;
+
+    public CheckController(CheckService checkService, EmployeeService employeeService,
+                           CustomerCardService customerCardService,
+                           ua.kma.aiszlagoda.persistence.service.SaleService saleService) {
         this.checkService = checkService;
         this.employeeService = employeeService;
         this.customerCardService = customerCardService;
+        this.saleService = saleService;
     }
 
     @GetMapping
@@ -36,7 +40,64 @@ public class CheckController {
         }
 
         model.addAttribute("checks", response.getObject());
+        model.addAttribute("employees", employeeService.findAllCashiers().getObject());
         return "check-list";
+    }
+
+    @GetMapping("/filter")
+    public String filterChecks(
+            @RequestParam(required = false) String employeeId,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
+            Model model) {
+
+        LocalDateTime from = (dateFrom != null && !dateFrom.isBlank())
+                ? LocalDate.parse(dateFrom).atStartOfDay()
+                : LocalDateTime.of(2000, 1, 1, 0, 0);
+        LocalDateTime to = (dateTo != null && !dateTo.isBlank())
+                ? LocalDate.parse(dateTo).atTime(23, 59, 59)
+                : LocalDateTime.now();
+
+        Response<List<Check>> response;
+        double sumTotal;
+
+        if (employeeId != null && !employeeId.isBlank()) {
+            response = checkService.findChecksByEmployeeAndPeriod(employeeId, from, to);
+            sumTotal = checkService.checkSumTotalByEmployeeAndPeriod(employeeId, from, to);
+        } else {
+            response = checkService.findChecksByPeriod(from, to);
+            sumTotal = checkService.checkSumTotalByPeriod(from, to);
+        }
+
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+
+        model.addAttribute("checks", response.getObject());
+        model.addAttribute("employees", employeeService.findAllCashiers().getObject());
+        model.addAttribute("selectedEmployee", employeeId);
+        model.addAttribute("dateFrom", dateFrom);
+        model.addAttribute("dateTo", dateTo);
+        model.addAttribute("sumTotal", sumTotal);
+        return "check-list";
+    }
+
+    @GetMapping("/info/{checkNumber}")
+    public String checkInfo(@PathVariable String checkNumber, Model model) {
+        Response<Check> checkResponse = checkService.findCheckByNumber(checkNumber);
+
+        if (!checkResponse.getErrors().isEmpty() || checkResponse.getObject() == null) {
+            model.addAttribute("errors", checkResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<List<ua.kma.aiszlagoda.persistence.model.Sale>> salesResponse =
+                saleService.findSalesForCheck(checkNumber);
+
+        model.addAttribute("check", checkResponse.getObject());
+        model.addAttribute("sales", salesResponse.getObject());
+        return "check-info";
     }
 
     @GetMapping("/add")
@@ -124,5 +185,25 @@ public class CheckController {
         }
 
         return "redirect:/check";
+    }
+
+    @GetMapping("/search")
+    public String searchByCheckNumber(@RequestParam String checkNumber, Model model) {
+        Response<Check> checkResponse = checkService.findCheckByNumber(checkNumber);
+
+        if (checkResponse.getObject() == null) {
+            model.addAttribute("checks", List.of());
+            model.addAttribute("employees", employeeService.findAllCashiers().getObject());
+            model.addAttribute("searchedNumber", checkNumber);
+            return "check-list";
+        }
+
+        Response<List<ua.kma.aiszlagoda.persistence.model.Sale>> salesResponse =
+                saleService.findSalesForCheck(checkNumber);
+
+        model.addAttribute("check", checkResponse.getObject());
+        model.addAttribute("sales", salesResponse.getObject());
+        model.addAttribute("searchedNumber", checkNumber);
+        return "check-info";
     }
 }

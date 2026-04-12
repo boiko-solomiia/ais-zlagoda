@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Check info</title>
+</head>
+<body class="checks-page">
+
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/home">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>Check <span th:text="${check.checkNumber}"></span></h1>
+    </div>
+
+    <div class="info-card-row" style="margin-bottom: 1.5rem;">
+        <div class="info-chip">
+            <span class="chip-label">Cashier ID</span>
+            <span class="chip-value" th:text="${check.idEmployee}"></span>
+        </div>
+        <div class="info-chip">
+            <span class="chip-label">Customer card</span>
+            <span class="chip-value" th:text="${check.cardNumber != null ? check.cardNumber : '—'}"></span>
+        </div>
+        <div class="info-chip">
+            <span class="chip-label">Date</span>
+            <span class="chip-value" th:text="${#temporals.format(check.printDate, 'dd.MM.yyyy HH:mm')}"></span>
+        </div>
+        <div class="info-chip chip-name">
+            <span class="chip-label">Total</span>
+            <span class="chip-value" th:text="${#numbers.formatDecimal(check.sumTotal, 1, 2) + ' грн'}"></span>
+        </div>
+        <div class="info-chip">
+            <span class="chip-label">VAT</span>
+            <span class="chip-value" th:text="${#numbers.formatDecimal(check.vat, 1, 2) + ' грн'}"></span>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(sales)}" class="empty-state">
+        <p>No items in this check.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(sales)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>UPC</th>
+                <th>Quantity</th>
+                <th>Price per unit</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sale : ${sales}">
+                <td th:text="${sale.upc}"></td>
+                <td th:text="${sale.productNumber}"></td>
+                <td th:text="${#numbers.formatDecimal(sale.sellingPrice, 1, 2) + ' грн'}"></td>
+                <td th:text="${#numbers.formatDecimal(sale.productNumber * sale.sellingPrice, 1, 2) + ' грн'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+        <a th:href="@{/check}" class="btn btn-primary">Back to list</a>
+    </div>
+</div>
+</body>
+</html>

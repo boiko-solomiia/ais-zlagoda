@@ -1,62 +1,158 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" th:href="@{/css/main.css}">
-  <title>Checks</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Checks</title>
 </head>
-<body>
+<body class="checks-page">
+
 <div class="navigation-bar">
-  <div class="navigation-links">
-    <a href="/">Home</a>
-    <a href="/product">Products</a>
-    <a href="/store-product">Store Products</a>
-    <a href="/category">Categories</a>
-    <a href="/employee">Employees</a>
-    <a href="/customer-card">Customer Cards</a>
-    <a href="/check" class="active">Checks</a>
-  </div>
-
-  <div class="account-menu">
-    <button class="account-btn">👤</button>
-    <div class="dropdown-menu">
-      <a href="/profile">My Profile</a>
-      <form th:action="@{/logout}" method="post" style="margin: 0;">
-        <button class="logout-btn" type="submit">Log Out</button>
-      </form>
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check" class="active">Checks</a>
     </div>
-  </div>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
 </div>
-<h2>Checks</h2>
 
-<a th:href="@{/check/add}">Add check</a>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Checks</h1>
+    </div>
 
-<ul>
-  <li th:each="ch : ${checks}">
-    <span th:text="${ch.checkNumber}"></span>
-    |
-    employee:
-    <span th:text="${ch.idEmployee}"></span>
-    |
-    card:
-    <span th:text="${ch.cardNumber}"></span>
-    |
-    date:
-    <span th:text="${#temporals.format(ch.printDate, 'yyyy-MM-dd HH:mm')}"></span>
-    |
-    total:
-    <span th:text="${ch.sumTotal}"></span>
-    |
-    vat:
-    <span th:text="${ch.vat}"></span>
+    <div class="action-bar checks-action-bar">
 
-    <a th:href="@{/check/edit/{checkNumber}(checkNumber=${ch.checkNumber})}">Edit</a>
+        <div class="checks-row">
+            <form th:action="@{/check/filter}" method="get" class="filters">
+                <div class="select-wrapper">
+                    <label>
+                        <select name="employeeId" class="category-select" style="min-width: 190px;">
+                            <option value="">All cashiers</option>
+                            <option th:each="emp : ${employees}"
+                                    th:value="${emp.idEmployee}"
+                                    th:text="${emp.emplSurname + ' ' + emp.emplName}"
+                                    th:selected="${selectedEmployee == emp.idEmployee}">
+                            </option>
+                        </select>
+                    </label>
+                    <span class="select-arrow">&#8964;</span>
+                </div>
 
-    <form th:action="@{/check/delete/{checkNumber}(checkNumber=${ch.checkNumber})}" method="post" style="display:inline;">
-      <button type="submit">Delete</button>
-    </form>
-  </li>
-</ul>
+                <div class="date-range">
+                    <label>
+                        <input type="date" name="dateFrom" class="search-input date-input" th:value="${dateFrom}">
+                    </label>
+                    <span class="date-sep">—</span>
+                    <label>
+                        <input type="date" name="dateTo" class="search-input date-input" th:value="${dateTo}">
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-secondary">Filter</button>
+                <a th:if="${selectedEmployee != null or dateFrom != null or dateTo != null}"
+                   th:href="@{/check}" class="btn btn-sort">Clear</a>
+            </form>
+        </div>
+
+        <div class="checks-row">
+            <form th:action="@{/check/search}" method="get" class="search-form">
+                <label>
+                    <input type="text" name="checkNumber" placeholder="Search by check number" class="search-input">
+                </label>
+                <button type="submit" class="btn btn-secondary">Search</button>
+                <a th:if="${searchedNumber}" th:href="@{/check}" class="btn btn-sort">Clear</a>
+            </form>
+
+            <a th:href="@{/check/add}" class="btn btn-primary">Add check</a>
+        </div>
+    </div>
+
+    <div th:if="${sumTotal != null}" class="sum-bar">
+        <span class="sum-label">Total for selected period:</span>
+        <span class="sum-value" th:text="${#numbers.formatDecimal(sumTotal, 1, 2) + ' грн'}"></span>
+    </div>
+
+    <div th:if="${selectedEmployee != null or dateFrom != null or dateTo != null or searchedNumber != null}"
+         class="active-filters">
+        <span th:if="${selectedEmployee != null}" class="filter-badge">
+            Cashier: <b th:each="emp : ${employees}"
+                        th:if="${emp.idEmployee == selectedEmployee}"
+                        th:text="${emp.emplSurname + ' ' + emp.emplName}"></b>
+            <a th:href="@{/check/filter(dateFrom=${dateFrom},dateTo=${dateTo})}" class="remove-filter">×</a>
+        </span>
+        <span th:if="${dateFrom != null}" class="filter-badge">
+            From: <b th:text="${dateFrom}"></b>
+            <a th:href="@{/check/filter(employeeId=${selectedEmployee},dateTo=${dateTo})}" class="remove-filter">×</a>
+        </span>
+        <span th:if="${dateTo != null}" class="filter-badge">
+            To: <b th:text="${dateTo}"></b>
+            <a th:href="@{/check/filter(employeeId=${selectedEmployee},dateFrom=${dateFrom})}"
+               class="remove-filter">×</a>
+        </span>
+        <span th:if="${searchedNumber}" class="filter-badge">
+            Search: <b th:text="${searchedNumber}"></b>
+            <a th:href="@{/check}" class="remove-filter">х</a>
+        </span>
+    </div>
+
+    <div th:if="${searchedNumber != null}" class="empty-state">
+        <p>No check found with number <b th:text="${searchedNumber}"></b></p>
+        <a th:href="@{/check/add}" class="btn btn-primary">Add check</a>
+    </div>
+
+    <div th:if="${searchedNumber == null and #lists.isEmpty(checks)}" class="empty-state">
+        <p>No checks found.</p>
+        <a th:href="@{/check/add}" class="btn btn-primary">Add check</a>
+    </div>
+
+    <div th:if="${searchedNumber == null and not #lists.isEmpty(checks)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Check number</th>
+                <th>Cashier ID</th>
+                <th>Customer card</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>VAT</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="check : ${checks}">
+                <td th:text="${check.checkNumber}"></td>
+                <td th:text="${check.idEmployee}"></td>
+                <td th:text="${check.cardNumber != null ? check.cardNumber : '—'}"></td>
+                <td th:text="${#temporals.format(check.printDate, 'dd.MM.yyyy HH:mm')}"></td>
+                <td th:text="${#numbers.formatDecimal(check.sumTotal, 1, 2) + ' грн'}"></td>
+                <td th:text="${#numbers.formatDecimal(check.vat, 1, 2) + ' грн'}"></td>
+                <td class="actions">
+                    <a th:href="@{/check/info/{n}(n=${check.checkNumber})}" class="btn-edit">View</a>
+                    <a th:href="@{/check/edit/{n}(n=${check.checkNumber})}" class="btn-edit">Edit</a>
+                    <form th:action="@{/check/delete/{n}(n=${check.checkNumber})}" method="post" class="inline-form">
+                        <button type="submit" class="btn-delete"
+                                onclick="return confirm('Are you sure?')">Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>
