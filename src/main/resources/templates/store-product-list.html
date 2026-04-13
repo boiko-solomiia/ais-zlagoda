@@ -86,6 +86,7 @@
         <table class="data-table">
             <thead>
             <tr>
+                <th>UPC</th>
                 <th>Name</th>
                 <th>Characteristics</th>
                 <th>Price</th>
@@ -95,6 +96,7 @@
             </thead>
             <tbody>
             <tr th:each="storeProduct : ${storeProducts}">
+                <td th:text="${storeProduct.upc}"></td>
                 <td th:text="${storeProduct.productName}"></td>
                 <td th:text="${storeProduct.characteristics}"></td>
                 <td th:text="${storeProduct.sellingPrice}"></td>

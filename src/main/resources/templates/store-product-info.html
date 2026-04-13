@@ -7,17 +7,17 @@
     <title>Store product info</title>
 </head>
 <body class="store-products-page">
+
 <div class="navigation-bar">
     <div class="navigation-links">
-        <a href="/home">Home</a>
+        <a href="/">Home</a>
         <a href="/product">Products</a>
-        <a href="/store-product">Store Products</a>
+        <a href="/store-product" class="active">Store Products</a>
         <a href="/category">Categories</a>
         <a href="/employee">Employees</a>
         <a href="/customer-card">Customer Cards</a>
         <a href="/check">Checks</a>
     </div>
-
     <div class="account-menu">
         <button class="account-btn">👤</button>
         <div class="dropdown-menu">
@@ -36,29 +36,30 @@
 
     <div th:if="${storeProductInfo == null}" class="empty-state">
         <p>No product found with UPC: <strong th:text="${searchUpc}"></strong></p>
-        <a th:href="@{/store-product}" class="btn btn-primary" style="margin-top: 0.75rem;">Back to store products</a>
+        <a th:href="@{/store-product}" class="btn btn-primary" style="margin-top: 0.75rem;">Back to list</a>
     </div>
 
     <div th:unless="${storeProductInfo == null}" class="info-card">
-        <div class="info-row">
-            <span class="info-label">Name</span>
-            <span class="info-value" th:text="${storeProductInfo.productName}"></span>
+        <p class="card-name" th:text="${storeProductInfo.productName}"></p>
+        <p class="card-chars" th:text="${storeProductInfo.characteristics}"></p>
+
+        <div class="divider"></div>
+
+        <div class="card-stats">
+            <div class="stat-row">
+                <span class="stat-label">Price</span>
+                <span class="stat-value"
+                      th:text="${#numbers.formatDecimal(storeProductInfo.sellingPrice, 1, 2) + ' грн'}"></span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">In stock</span>
+                <span class="stat-value" th:text="${storeProductInfo.productsNumber + ' units'}"></span>
+            </div>
         </div>
-        <div class="info-row">
-            <span class="info-label">Characteristics</span>
-            <span class="info-value" th:text="${storeProductInfo.characteristics}"></span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Selling price</span>
-            <span class="info-value" th:text="${storeProductInfo.sellingPrice}"></span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Quantity</span>
-            <span class="info-value" th:text="${storeProductInfo.productsNumber}"></span>
-        </div>
-        <div>
-            <a th:href="@{/store-product}" class="btn btn-primary">Back to store products</a>
-        </div>
+
+        <div class="divider"></div>
+
+        <a th:href="@{/store-product}" class="btn back-btn">← Back to list</a>
     </div>
 </div>
 </body>
