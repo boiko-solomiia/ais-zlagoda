@@ -974,3 +974,24 @@ h2 {
     padding: 0.4rem 0.9rem;
     white-space: nowrap;
 }
+
+.form-optional { font-weight: 400; font-size: 0.8rem; color: var(--text-light); }
+
+.form-field:last-child { margin-bottom: 0; }
+
+.form-section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--secondary-dark);
+    margin: 0 0 1.1rem 0;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--primary-light);
+}
+
+.cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+}

@@ -1,70 +1,122 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <title>Edit employee</title>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <title>Edit employee</title>
 </head>
-<body>
-<h2>Edit Employee</h2>
+<body class="employees-page">
 
-<form th:action="@{/employee/edit}" method="post" th:object="${employee}">
-  <input type="hidden" th:field="*{idEmployee}">
-
-  <label>Surname:</label>
-  <input type="text" th:field="*{emplSurname}">
-  <br><br>
-
-  <label>Name:</label>
-  <input type="text" th:field="*{emplName}">
-  <br><br>
-
-  <label>Patronymic:</label>
-  <input type="text" th:field="*{emplPatronymic}">
-  <br><br>
-
-  <label>Role:</label>
-  <select th:field="*{emplRole}">
-    <option value="">-- Select role --</option>
-    <option value="касир">Касир</option>
-    <option value="менеджер">Менеджер</option>
-  </select>
-  <br><br>
-
-  <label>Salary:</label>
-  <input type="number" step="0.01" th:field="*{salary}">
-  <br><br>
-
-  <label>Date of Birth:</label>
-  <input type="date" th:field="*{dateOfBirth}">
-  <br><br>
-
-  <label>Date of Start:</label>
-  <input type="date" th:field="*{dateOfStart}">
-  <br><br>
-
-  <label>Phone Number:</label>
-  <input type="tel" th:field="*{phoneNumber}" placeholder="+380501234567">
-  <br><br>
-
-  <label>City:</label>
-  <input type="text" th:field="*{city}">
-  <br><br>
-
-  <label>Street:</label>
-  <input type="text" th:field="*{street}">
-  <br><br>
-
-  <label>Zip Code:</label>
-  <input type="text" th:field="*{zipCode}">
-  <br><br>
-
-  <button type="submit">Update</button>
-</form>
-
-<div th:if="${errors}">
-  <p th:each="err : ${errors}" th:text="${err}"></p>
+<div class="navigation-bar">
+  <div class="navigation-links">
+    <a href="/">Home</a>
+    <a href="/product">Products</a>
+    <a href="/store-product">Store Products</a>
+    <a href="/category">Categories</a>
+    <a href="/employee" class="active">Employees</a>
+    <a href="/customer-card">Customer Cards</a>
+    <a href="/check">Checks</a>
+  </div>
+  <div class="account-menu">
+    <button class="account-btn">👤</button>
+    <div class="dropdown-menu">
+      <a href="/profile">My Profile</a>
+      <form th:action="@{/logout}" method="post" style="margin: 0;">
+        <button class="logout-btn" type="submit">Log Out</button>
+      </form>
+    </div>
+  </div>
 </div>
 
-<a th:href="@{/employee}">Back to employees</a>
+<div class="main-content">
+  <div class="page-header">
+    <h1>Edit Employee</h1>
+  </div>
+
+  <form th:action="@{/employee/edit}" method="post" th:object="${employee}" class="employee-form">
+    <input type="hidden" th:field="*{idEmployee}">
+
+    <div class="cards-row">
+
+      <div class="form-card">
+        <h3 class="form-section-title">Personal information</h3>
+
+        <div class="form-field">
+          <label class="form-label">Surname</label>
+          <input type="text" th:field="*{emplSurname}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Name</label>
+          <input type="text" th:field="*{emplName}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Patronymic <span class="form-optional">(optional)</span></label>
+          <input type="text" th:field="*{emplPatronymic}" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3 class="form-section-title">Additional information</h3>
+
+        <div class="form-field">
+          <label class="form-label">Role</label>
+          <div class="select-wrapper">
+            <select th:field="*{emplRole}" class="category-select form-control">
+              <option value="">Select role</option>
+              <option value="касир">Касир</option>
+              <option value="менеджер">Менеджер</option>
+            </select>
+            <span class="select-arrow">&#8964;</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Salary</label>
+          <input type="number" step="0.01" th:field="*{salary}" class="form-control" placeholder="0.00">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Date of birth</label>
+          <input type="date" th:field="*{dateOfBirth}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Date of start</label>
+          <input type="date" th:field="*{dateOfStart}" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3 class="form-section-title">Contact & address</h3>
+
+        <div class="form-field">
+          <label class="form-label">Phone number</label>
+          <input type="tel" th:field="*{phoneNumber}" class="form-control" placeholder="+380501234567">
+        </div>
+        <div class="form-field">
+          <label class="form-label">City</label>
+          <input type="text" th:field="*{city}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Street</label>
+          <input type="text" th:field="*{street}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">ZIP code</label>
+          <input type="text" th:field="*{zipCode}" class="form-control">
+        </div>
+      </div>
+
+    </div>
+
+    <div th:if="${errors}" class="errors-block">
+      <p th:each="err : ${errors}" th:text="${err}"></p>
+    </div>
+
+    <div class="form-actions">
+      <a th:href="@{/employee}" class="btn btn-sort">Cancel</a>
+      <button type="submit" class="btn btn-primary">Save changes</button>
+    </div>
+
+  </form>
+</div>
 </body>
 </html>
