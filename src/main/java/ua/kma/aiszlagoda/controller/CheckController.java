@@ -1,5 +1,6 @@
 package ua.kma.aiszlagoda.controller;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import ua.kma.aiszlagoda.persistence.service.SaleService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Controller
@@ -33,7 +35,7 @@ public class CheckController {
 
     @GetMapping
     public String getAllChecks(Model model) {
-        Response<List<Check>> response = checkService.findAll();
+        Response<List<CheckDTO>> response = checkService.findAllDTO();
         if (!response.getErrors().isEmpty()) {
             model.addAttribute("errors", response.getErrors());
             return "error-page";
@@ -47,26 +49,22 @@ public class CheckController {
     @GetMapping("/filter")
     public String filterChecks(
             @RequestParam(required = false) String employeeId,
-            @RequestParam(required = false) String dateFrom,
-            @RequestParam(required = false) String dateTo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
             Model model) {
 
-        LocalDateTime from = (dateFrom != null && !dateFrom.isBlank())
-                ? LocalDate.parse(dateFrom).atStartOfDay()
-                : LocalDateTime.of(2000, 1, 1, 0, 0);
-        LocalDateTime to = (dateTo != null && !dateTo.isBlank())
-                ? LocalDate.parse(dateTo).atTime(23, 59, 59)
-                : LocalDateTime.now();
+        LocalDateTime start = (dateFrom != null) ? dateFrom.atStartOfDay() : LocalDateTime.of(1970, 1, 1, 0, 0);
+        LocalDateTime end = (dateTo != null) ? dateTo.atTime(LocalTime.MAX) : LocalDateTime.now();
 
-        Response<List<Check>> response;
-        double sumTotal;
+        Response<List<CheckDTO>> response;
+        double sumTotal = 0;
 
         if (employeeId != null && !employeeId.isBlank()) {
-            response = checkService.findChecksByEmployeeAndPeriod(employeeId, from, to);
-            sumTotal = checkService.checkSumTotalByEmployeeAndPeriod(employeeId, from, to);
+            response = checkService.findChecksDTOByEmployeeAndPeriod(employeeId, start, end);
+            sumTotal = checkService.checkSumTotalByEmployeeAndPeriod(employeeId, start, end);
         } else {
-            response = checkService.findChecksByPeriod(from, to);
-            sumTotal = checkService.checkSumTotalByPeriod(from, to);
+            response = checkService.findChecksDTOByPeriod(start, end);
+            sumTotal = checkService.checkSumTotalByPeriod(start, end);
         }
 
         if (!response.getErrors().isEmpty()) {
@@ -76,10 +74,12 @@ public class CheckController {
 
         model.addAttribute("checks", response.getObject());
         model.addAttribute("employees", employeeService.findAllCashiers().getObject());
+        model.addAttribute("sumTotal", sumTotal);
+
         model.addAttribute("selectedEmployee", employeeId);
         model.addAttribute("dateFrom", dateFrom);
         model.addAttribute("dateTo", dateTo);
-        model.addAttribute("sumTotal", sumTotal);
+
         return "check-list";
     }
 
@@ -134,46 +134,6 @@ public class CheckController {
 
         return "redirect:/check";
     }
-
-    @GetMapping("/edit/{checkNumber}")
-    public String showEditForm(@PathVariable String checkNumber, Model model) {
-        Response<Check> response = checkService.findCheckByNumber(checkNumber);
-        Response<List<Employee>> employeesResponse = employeeService.findAllEmployees();
-        Response<List<CustomerCard>> cardsResponse = customerCardService.findAll();
-
-        if (!response.getErrors().isEmpty() || response.getObject() == null) {
-            model.addAttribute("errors", response.getErrors());
-            return "error-page";
-        }
-
-        if (!employeesResponse.getErrors().isEmpty() || !cardsResponse.getErrors().isEmpty()) {
-            model.addAttribute("errors",
-                    !employeesResponse.getErrors().isEmpty()
-                            ? employeesResponse.getErrors()
-                            : cardsResponse.getErrors());
-            return "error-page";
-        }
-
-        model.addAttribute("check", response.getObject());
-        model.addAttribute("employees", employeesResponse.getObject());
-        model.addAttribute("customerCards", cardsResponse.getObject());
-        return "check-edit";
-    }
-
-//    @PostMapping("/edit")
-//    public String editCheck(@ModelAttribute Check myCheck, Model model) {
-//        Response<Check> response = checkService.updateCheck(myCheck);
-//
-//        if (!response.getErrors().isEmpty()) {
-//            model.addAttribute("errors", response.getErrors());
-//            model.addAttribute("check", myCheck);
-//            model.addAttribute("employees", employeeService.findAllEmployees().getObject());
-//            model.addAttribute("customerCards", customerCardService.findAll().getObject());
-//            return "check-edit";
-//        }
-//
-//        return "redirect:/check";
-//    }
 
     @PostMapping("/delete/{checkNumber}")
     public String deleteCheck(@PathVariable String checkNumber, Model model) {

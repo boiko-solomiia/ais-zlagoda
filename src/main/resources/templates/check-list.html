@@ -158,17 +158,23 @@
             <tbody>
             <tr th:each="check : ${checks}">
                 <td th:text="${check.checkNumber}"></td>
-                <td th:text="${check.idEmployee}"></td>
-                <td th:text="${check.cardNumber != null ? check.cardNumber : '—'}"></td>
+                <td>
+                    <span th:text="${check.idEmployee}"></span><br/>
+                    <small class="small-info" th:text="${check.employeeFullName}"></small>
+                </td>
+                <td>
+                    <span th:text="${check.cardNumber != null ? check.cardNumber : '—'}"></span><br/>
+                    <small class="small-info"
+                           th:if="${check.cardNumber != null}"
+                           th:text="${check.customerFullName}"></small>
+                </td>
                 <td th:text="${#temporals.format(check.printDate, 'dd.MM.yyyy HH:mm')}"></td>
                 <td th:text="${#numbers.formatDecimal(check.sumTotal, 1, 2) + ' грн'}"></td>
                 <td th:text="${#numbers.formatDecimal(check.vat, 1, 2) + ' грн'}"></td>
                 <td class="actions">
-                    <a th:href="@{/check/info/{n}(n=${check.checkNumber})}" class="btn-edit">View</a>
-                    <form th:action="@{/check/delete/{n}(n=${check.checkNumber})}" method="post"
-                          class="inline-form">
-                        <button type="submit" class="btn-delete"
-                                onclick="return confirm('Are you sure?')">Delete
+                    <a th:href="@{/check/info/{id}(id=${check.checkNumber})}" class="btn-edit">View</a>
+                    <form th:action="@{/check/delete/{id}(id=${check.checkNumber})}" method="post" class="inline-form">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete
                         </button>
                     </form>
                 </td>
