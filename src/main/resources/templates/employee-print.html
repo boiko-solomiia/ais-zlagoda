@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <title>Employees Report</title>
+</head>
+<body>
+<div class="print-container">
+  <div class="print-header">
+    <h1>EMPLOYEES REPORT</h1>
+    <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
+    <div class="print-actions">
+      <a href="/employee" class="back-btn">← Back to list</a>
+      <button onclick="window.print()" class="print-btn">Print</button>
+    </div>
+  </div>
+
+  <table class="print-table">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Surname</th>
+      <th>Name</th>
+      <th>Patronymic</th>
+      <th>Role</th>
+      <th>Salary (UAH)</th>
+      <th>Date of Birth</th>
+      <th>Start Date</th>
+      <th>Phone</th>
+      <th>City</th>
+      <th>Street</th>
+      <th>ZIP</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="e : ${employees}">
+      <td th:text="${e.idEmployee}"></td>
+      <td th:text="${e.emplSurname}"></td>
+      <td th:text="${e.emplName}"></td>
+      <td th:text="${e.emplPatronymic}"></td>
+      <td th:text="${e.emplRole}"></td>
+      <td class="text-right" th:text="${#numbers.formatDecimal(e.salary, 1, 2)}"></td>
+      <td th:text="${e.dateOfBirth}"></td>
+      <td th:text="${e.dateOfStart}"></td>
+      <td th:text="${e.phoneNumber}"></td>
+      <td th:text="${e.city}"></td>
+      <td th:text="${e.street}"></td>
+      <td th:text="${e.zipCode}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

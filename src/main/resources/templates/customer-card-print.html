@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <title>Customer Cards Report</title>
+</head>
+<body>
+<div class="print-container">
+  <div class="print-header">
+    <h1>CUSTOMER CARDS REPORT</h1>
+    <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
+    <div class="print-actions">
+      <a href="/customer-card" class="back-btn">← Back to list</a>
+      <button onclick="window.print()" class="print-btn">Print</button>
+    </div>
+  </div>
+
+  <table class="print-table">
+    <thead>
+    <tr>
+      <th>Card Number</th>
+      <th>Surname</th>
+      <th>Name</th>
+      <th>Patronymic</th>
+      <th>Phone</th>
+      <th>Discount (%)</th>
+      <th>City</th>
+      <th>Street</th>
+      <th>ZIP</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="c : ${customerCards}">
+      <td th:text="${c.cardNumber}"></td>
+      <td th:text="${c.custSurname}"></td>
+      <td th:text="${c.custName}"></td>
+      <td th:text="${c.custPatronymic}"></td>
+      <td th:text="${c.phoneNumber}"></td>
+      <td th:text="${c.percent}"></td>
+      <td th:text="${c.city}"></td>
+      <td th:text="${c.street}"></td>
+      <td th:text="${c.zipCode}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

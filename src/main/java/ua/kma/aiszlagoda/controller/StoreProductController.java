@@ -3,10 +3,7 @@ package ua.kma.aiszlagoda.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ua.kma.aiszlagoda.persistence.model.Product;
-import ua.kma.aiszlagoda.persistence.model.Response;
-import ua.kma.aiszlagoda.persistence.model.StoreProduct;
-import ua.kma.aiszlagoda.persistence.model.StoreProductInfo;
+import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
 import ua.kma.aiszlagoda.persistence.service.StoreProductService;
 
@@ -186,5 +183,16 @@ public class StoreProductController {
         model.addAttribute("filterType", filterType);
 
         return "store-product-list";
+    }
+
+    @GetMapping("/print")
+    public String printStoreProducts(Model model) {
+        Response<List<StoreProductPrintDTO>> response = storeProductService.findAllForPrint();
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+        model.addAttribute("storeProducts", response.getObject());
+        return "store-product-print";
     }
 }

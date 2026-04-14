@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <title>Checks Report</title>
+</head>
+<body>
+<div class="print-container">
+  <div class="print-header">
+    <h1>CHECKS REPORT</h1>
+    <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
+    <div class="print-actions">
+      <a href="/check" class="back-btn">← Back to list</a>
+      <button onclick="window.print()" class="print-btn">Print</button>
+    </div>
+  </div>
+
+  <table class="print-table">
+    <thead>
+    <tr>
+      <th>Check Number</th>
+      <th>Cashier (ID)</th>
+      <th>Customer (Card)</th>
+      <th>Print Date</th>
+      <th>Total (UAH)</th>
+      <th>VAT (UAH)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="ch : ${checks}">
+      <td th:text="${ch.checkNumber}"></td>
+      <td th:text="${ch.employeeFullName + ' (' + ch.idEmployee + ')'}"></td>
+      <td>
+        <th:block th:if="${ch.cardNumber != null}">
+          <span th:text="${ch.customerFullName + ' (' + ch.cardNumber + ')'}"></span>
+        </th:block>
+        <span th:unless="${ch.cardNumber != null}">—</span>
+      </td>
+      <td th:text="${#temporals.format(ch.printDate, 'dd.MM.yyyy HH:mm')}"></td>
+      <td class="text-right" th:text="${#numbers.formatDecimal(ch.sumTotal, 1, 2)}"></td>
+      <td class="text-right" th:text="${#numbers.formatDecimal(ch.vat, 1, 2)}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

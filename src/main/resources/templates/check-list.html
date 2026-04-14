@@ -5,25 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <title>Checks</title>
-    <style>
-        .btn-today {
-            padding: 0.4rem 0.9rem;
-            background: var(--secondary-very-light);
-            color: var(--secondary-dark);
-            border: 1px solid var(--secondary-light);
-            border-radius: var(--border-radius-sm);
-            font-size: 0.9rem;
-            font-family: var(--font-family), serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            white-space: nowrap;
-        }
-
-        .btn-today:hover {
-            background: var(--secondary-color);
-        }
-    </style>
 </head>
 <body class="checks-page">
 
@@ -100,7 +81,10 @@
                 <a th:if="${searchedNumber}" th:href="@{/check}" class="btn btn-sort">Clear</a>
             </form>
 
-            <a th:href="@{/check/add}" class="btn btn-primary">Add check</a>
+            <div class="action-buttons">
+                <a th:href="@{/check/add}" class="btn btn-primary">Add check</a>
+                <a th:href="@{/check/print}" class="btn btn-sort">Print Report</a>
+            </div>
         </div>
     </div>
 

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.model.StoreProduct;
 import ua.kma.aiszlagoda.persistence.model.StoreProductInfo;
+import ua.kma.aiszlagoda.persistence.model.StoreProductPrintDTO;
 
 import java.sql.*;
 import java.util.Collections;
@@ -503,6 +504,41 @@ public class StoreProductService {
                 }
             }
             return new Response<>(null, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<List<StoreProductPrintDTO>> findAllForPrint() {
+        String query = """
+        SELECT sp.upc,
+               p.product_name,
+               p.characteristics,
+               sp.selling_price,
+               sp.products_number,
+               sp.promotional_product
+        FROM store_product sp
+        JOIN product p ON sp.product_id = p.product_id
+        ORDER BY p.product_name ASC
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<StoreProductPrintDTO> products = new LinkedList<>();
+
+            while (resultSet.next()) {
+                StoreProductPrintDTO dto = new StoreProductPrintDTO(
+                        resultSet.getString("upc"),
+                        resultSet.getString("product_name"),
+                        resultSet.getString("characteristics"),
+                        resultSet.getDouble("selling_price"),
+                        resultSet.getInt("products_number"),
+                        resultSet.getBoolean("promotional_product")
+                );
+                products.add(dto);
+            }
+
+            return new Response<>(products, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }

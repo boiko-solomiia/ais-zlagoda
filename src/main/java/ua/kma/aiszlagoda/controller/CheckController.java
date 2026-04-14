@@ -166,4 +166,22 @@ public class CheckController {
         model.addAttribute("searchedNumber", checkNumber);
         return "check-info";
     }
+
+    @GetMapping("/print")
+    public String printChecks(Model model) {
+        Response<List<CheckDTO>> response = checkService.findAllDTO();
+        double sumTotal = checkService.checkSumTotalByPeriod(
+                LocalDateTime.of(1970, 1, 1, 0, 0),
+                LocalDateTime.now()
+        );
+
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+
+        model.addAttribute("checks", response.getObject());
+        model.addAttribute("sumTotal", sumTotal);
+        return "check-print";
+    }
 }

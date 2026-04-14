@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <title>Categories Report</title>
+</head>
+<body>
+<div class="print-container">
+  <div class="print-header">
+    <h1>CATEGORIES REPORT</h1>
+    <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
+    <div class="print-actions">
+      <a href="/category" class="back-btn">← Back to list</a>
+      <button onclick="window.print()" class="print-btn">Print</button>
+    </div>
+  </div>
+
+  <table class="print-table">
+    <thead>
+    <tr>
+      <th>Category ID</th>
+      <th>Category Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="cat : ${categories}">
+      <td th:text="${cat.categoryNumber}"></td>
+      <td th:text="${cat.categoryName}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

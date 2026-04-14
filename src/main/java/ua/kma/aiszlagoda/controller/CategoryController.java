@@ -109,4 +109,15 @@ public class CategoryController {
         model.addAttribute("searchName", name);
         return "category-list";
     }
+
+    @GetMapping("/print")
+    public String printCategories(Model model) {
+        Response<List<Category>> response = categoryService.findAll();
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+        model.addAttribute("categories", response.getObject());
+        return "category-print";
+    }
 }

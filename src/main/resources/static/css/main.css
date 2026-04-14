@@ -1005,6 +1005,24 @@ h2 {
     margin-bottom: 1.25rem;
 }
 
+.btn-today {
+    padding: 0.4rem 0.9rem;
+    background: var(--secondary-very-light);
+    color: var(--secondary-dark);
+    border: 1px solid var(--secondary-light);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-family: var(--font-family), serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.btn-today:hover {
+    background: var(--secondary-color);
+}
+
 .percent-input-wrapper {
     position: relative;
     display: flex;
@@ -1052,4 +1070,126 @@ h2 {
 
 .small-info {
     color: var(--secondary-light);
+}
+
+.print-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.print-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--secondary-dark);
+}
+
+.print-header h1 {
+    color: var(--secondary-dark);
+    font-size: 24px;
+    margin-bottom: 10px;
+    border-left: none;
+    padding-left: 0;
+}
+
+.print-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+
+.print-btn, .back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-family), serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    width: fit-content;
+}
+
+.print-btn {
+    background: var(--secondary-very-light);
+    color: var(--secondary-dark);
+    border: 1px solid var(--secondary-light);
+}
+
+.print-btn:hover {
+    background: var(--secondary-light);
+    color: var(--white);
+}
+
+.back-btn {
+    background: var(--primary-very-light);
+    color: var(--primary-dark);
+    border: 1px solid var(--primary-light);
+}
+
+.back-btn:hover {
+    background: var(--primary-light);
+    color: var(--white);
+}
+
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.print-table th {
+    background: var(--secondary-color);
+    color: var(--secondary-dark);
+    padding: 10px;
+    text-align: center;
+    border: 1px solid var(--secondary-dark);
+}
+
+.print-table td {
+    padding: 8px;
+    border: 1px solid var(--secondary-light);
+    text-align: center;
+}
+
+.print-table .text-right {
+    text-align: right;
+}
+
+.print-summary {
+    margin-top: 20px;
+    padding: 10px;
+    background: var(--gray-light);
+    text-align: right;
+    font-weight: bold;
+}
+
+@media print {
+    .print-btn, .back-btn {
+        display: none;
+    }
+
+    .print-container {
+        padding: 0;
+        margin: 0;
+    }
+
+    .print-header {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+
+    .print-table th {
+        background: #ddd !important;
+        color: black !important;
+    }
+
+    .print-table td {
+        border: 1px solid #ccc !important;
+    }
 }

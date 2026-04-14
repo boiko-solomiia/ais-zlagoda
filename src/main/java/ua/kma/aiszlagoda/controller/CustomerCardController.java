@@ -118,4 +118,15 @@ public class CustomerCardController {
         model.addAttribute("selectedPercent", percent);
         return "customer-card-list";
     }
+
+    @GetMapping("/print")
+    public String printCustomerCards(Model model) {
+        Response<List<CustomerCard>> response = customerCardService.findAll();
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+        model.addAttribute("customerCards", response.getObject());
+        return "customer-card-print";
+    }
 }

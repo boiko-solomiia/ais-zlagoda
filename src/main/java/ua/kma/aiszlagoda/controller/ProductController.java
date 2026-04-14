@@ -136,4 +136,15 @@ public class ProductController {
         model.addAttribute("selectedCategory", categoryNumber);
         return "product-list";
     }
+
+    @GetMapping("/print")
+    public String printProducts(Model model) {
+        Response<List<Product>> response = productService.findAll();
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+        model.addAttribute("products", response.getObject());
+        return "product-print";
+    }
 }

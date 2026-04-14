@@ -119,4 +119,15 @@ public class EmployeeController {
         model.addAttribute("selectedRole", role);
         return "employee-list";
     }
+
+    @GetMapping("/print")
+    public String printEmployees(Model model) {
+        Response<List<Employee>> response = employeeService.findAllEmployees();
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+        model.addAttribute("employees", response.getObject());
+        return "employee-print";
+    }
 }
