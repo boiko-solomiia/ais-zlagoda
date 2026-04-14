@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <title>My Profile</title>
+</head>
+<body class="employees-page">
+
+<div class="navigation-bar">
+  <div class="navigation-links">
+    <a href="/">Home</a>
+    <a href="/product">Products</a>
+    <a href="/store-product">Store Products</a>
+    <a href="/category">Categories</a>
+    <a href="/employee">Employees</a>
+    <a href="/customer-card">Customer Cards</a>
+    <a href="/check">Checks</a>
+  </div>
+  <div class="account-menu">
+    <button class="account-btn">👤</button>
+    <div class="dropdown-menu">
+      <a href="/profile" class="active">My Profile</a>
+      <form th:action="@{/logout}" method="post" style="margin: 0;">
+        <button class="logout-btn" type="submit">Log Out</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="page-header">
+    <h1>My Profile</h1>
+  </div>
+
+  <div class="profile-container">
+    <div class="form-card" style="margin-bottom: 2rem;">
+      <h3 class="form-section-title">Personal Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Full Name:</span>
+          <span class="info-value" th:text="${employee.emplSurname + ' ' + employee.emplName + ' ' + (employee.emplPatronymic ?: '')}"></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Role:</span>
+          <span class="info-value" th:text="${employee.emplRole}"></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">ID:</span>
+          <span class="info-value" th:text="${employee.idEmployee}"></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Phone:</span>
+          <span class="info-value" th:text="${employee.phoneNumber}"></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Salary:</span>
+          <span class="info-value" th:text="${employee.salary + ' грн'}"></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Address:</span>
+          <span class="info-value" th:text="${employee.city + ', ' + employee.street}"></span>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${employee.emplRole.equals('касир')}" class="table-card">
+      <h3 class="form-section-title">My Checks Today</h3>
+
+      <div th:if="${#lists.isEmpty(todayChecks)}" class="empty-state">
+        <p>You haven't created any checks today yet.</p>
+      </div>
+
+      <div th:unless="${#lists.isEmpty(todayChecks)}" class="table-container">
+        <table class="data-table">
+          <thead>
+          <tr>
+            <th>Check №</th>
+            <th>Time</th>
+            <th>Total Amount</th>
+            <th>VAT</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="check : ${todayChecks}">
+            <td th:text="${check.checkNumber}"></td>
+            <td th:text="${#temporals.format(check.printDate, 'HH:mm')}"></td>
+            <td th:text="${check.sumTotal + ' грн'}"></td>
+            <td th:text="${check.vat + ' грн'}"></td>
+            <td>
+              <a th:href="@{/check/search(checkNumber=${check.checkNumber})}" class="btn-edit">View Details</a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

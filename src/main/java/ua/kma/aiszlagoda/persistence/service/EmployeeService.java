@@ -271,4 +271,22 @@ public class EmployeeService {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
     }
+
+    public Response<Employee> findEmployeeByUsername(String username) {
+        String query = """
+        SELECT e.* FROM employee e
+        JOIN user_account u ON e.id_employee = u.id_employee
+        WHERE u.username = ?
+    """;
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new Response<>(employeeFromResultSet(resultSet), new java.util.LinkedList<>());
+            }
+            return new Response<>(null, java.util.Collections.singletonList("Employee not found"));
+        } catch (SQLException e) {
+            return new Response<>(null, java.util.Collections.singletonList(e.getMessage()));
+        }
+    }
 }
