@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <title>Checks</title>
+    <style>
+        .btn-today {
+            padding: 0.4rem 0.9rem;
+            background: var(--secondary-very-light);
+            color: var(--secondary-dark);
+            border: 1px solid var(--secondary-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem;
+            font-family: var(--font-family), serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .btn-today:hover {
+            background: var(--secondary-color);
+        }
+    </style>
 </head>
 <body class="checks-page">
 
@@ -37,7 +56,7 @@
     <div class="action-bar checks-action-bar">
 
         <div class="checks-row">
-            <form th:action="@{/check/filter}" method="get" class="filters">
+            <form th:action="@{/check/filter}" method="get" class="filters" id="filter-form">
                 <div class="select-wrapper">
                     <label>
                         <select name="employeeId" class="category-select" style="min-width: 190px;">
@@ -54,15 +73,18 @@
 
                 <div class="date-range">
                     <label>
-                        <input type="date" name="dateFrom" class="search-input date-input" th:value="${dateFrom}">
+                        <input type="date" name="dateFrom" id="dateFrom" class="search-input date-input"
+                               th:value="${dateFrom}">
                     </label>
                     <span class="date-sep">—</span>
                     <label>
-                        <input type="date" name="dateTo" class="search-input date-input" th:value="${dateTo}">
+                        <input type="date" name="dateTo" id="dateTo" class="search-input date-input"
+                               th:value="${dateTo}">
                     </label>
                 </div>
 
                 <button type="submit" class="btn btn-secondary">Filter</button>
+                <button type="button" class="btn-today" onclick="filterToday()">Today</button>
                 <a th:if="${selectedEmployee != null or dateFrom != null or dateTo != null}"
                    th:href="@{/check}" class="btn btn-sort">Clear</a>
             </form>
@@ -71,7 +93,8 @@
         <div class="checks-row">
             <form th:action="@{/check/search}" method="get" class="search-form">
                 <label>
-                    <input type="text" name="checkNumber" placeholder="Search by check number" class="search-input">
+                    <input type="text" name="checkNumber" placeholder="Search by check number"
+                           class="search-input">
                 </label>
                 <button type="submit" class="btn btn-secondary">Search</button>
                 <a th:if="${searchedNumber}" th:href="@{/check}" class="btn btn-sort">Clear</a>
@@ -142,7 +165,8 @@
                 <td th:text="${#numbers.formatDecimal(check.vat, 1, 2) + ' грн'}"></td>
                 <td class="actions">
                     <a th:href="@{/check/info/{n}(n=${check.checkNumber})}" class="btn-edit">View</a>
-                    <form th:action="@{/check/delete/{n}(n=${check.checkNumber})}" method="post" class="inline-form">
+                    <form th:action="@{/check/delete/{n}(n=${check.checkNumber})}" method="post"
+                          class="inline-form">
                         <button type="submit" class="btn-delete"
                                 onclick="return confirm('Are you sure?')">Delete
                         </button>
@@ -153,5 +177,14 @@
         </table>
     </div>
 </div>
+
+<script>
+    function filterToday() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dateFrom').value = today;
+        document.getElementById('dateTo').value = today;
+        document.getElementById('filter-form').submit();
+    }
+</script>
 </body>
 </html>
