@@ -1076,6 +1076,7 @@ h2 {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    background: white;
 }
 
 .print-header {
@@ -1093,10 +1094,17 @@ h2 {
     padding-left: 0;
 }
 
+.print-header p {
+    color: var(--text-light);
+    font-size: 12px;
+    margin: 0;
+}
+
 .print-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 0.75rem;
-    margin-left: auto;
+    margin-bottom: 20px;
 }
 
 .print-btn, .back-btn {
@@ -1137,6 +1145,10 @@ h2 {
     color: var(--white);
 }
 
+.print-content {
+    min-height: 500px;
+}
+
 .print-table {
     width: 100%;
     border-collapse: collapse;
@@ -1157,21 +1169,25 @@ h2 {
     text-align: center;
 }
 
-.print-table .text-right {
-    text-align: right;
-}
-
-.print-summary {
-    margin-top: 20px;
-    padding: 10px;
-    background: var(--gray-light);
-    text-align: right;
-    font-weight: bold;
+.print-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--secondary-light);
+    font-size: 11px;
+    color: var(--text-light);
 }
 
 @media print {
-    .print-btn, .back-btn {
-        display: none;
+    @page {
+        margin: 1.5cm;
+        size: A4;
+    }
+
+    .print-actions,
+    .print-btn,
+    .back-btn {
+        display: none !important;
     }
 
     .print-container {
@@ -1182,14 +1198,31 @@ h2 {
     .print-header {
         margin-bottom: 20px;
         padding-bottom: 10px;
+        border-bottom: 2px solid #000;
+    }
+
+    .print-footer {
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #000;
+        text-align: center;
+        font-size: 10px;
+    }
+
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .print-table th,
+    .print-table td {
+        border: 1px solid #000;
+        padding: 6px;
     }
 
     .print-table th {
         background: #ddd !important;
-        color: black !important;
-    }
-
-    .print-table td {
-        border: 1px solid #ccc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }

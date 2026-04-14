@@ -1,42 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" th:href="@{/css/main.css}">
-  <title>Products Report</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Products Report</title>
 </head>
 <body>
 <div class="print-container">
-  <div class="print-header">
-    <h1>PRODUCTS REPORT</h1>
-    <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
-    <div class="print-actions">
-      <a href="/product" class="back-btn">← Back to list</a>
-      <button onclick="window.print()" class="print-btn">Print</button>
+    <div class="print-header">
+        <h1>PRODUCTS REPORT</h1>
+        <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
     </div>
-  </div>
 
-  <table class="print-table">
-    <thead>
-    <tr>
-      <th>ID</th>
-      <th>Product Name</th>
-      <th>Manufacturer</th>
-      <th>Characteristics</th>
-      <th>Category ID</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="p : ${products}">
-      <td th:text="${p.productId}"></td>
-      <td th:text="${p.productName}"></td>
-      <td th:text="${p.manufacturer}"></td>
-      <td th:text="${p.characteristics}"></td>
-      <td th:text="${p.categoryNumber}"></td>
-    </tr>
-    </tbody>
-  </table>
+    <div class="print-actions">
+        <a href="/product" class="back-btn">← Back to list</a>
+        <button onclick="window.print()" class="print-btn">Print</button>
+    </div>
+
+    <div class="print-content">
+        <table class="print-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>Manufacturer</th>
+                <th>Characteristics</th>
+                <th>Category ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${products}">
+                <td th:text="${p.productId}"></td>
+                <td th:text="${p.productName}"></td>
+                <td th:text="${p.manufacturer}"></td>
+                <td th:text="${p.characteristics}"></td>
+                <td th:text="${p.categoryNumber}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="print-footer">
+        <p>Zlagoda Supermarket | <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy')}"></span></p>
+    </div>
 </div>
 </body>
 </html>

@@ -1,44 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" th:href="@{/css/main.css}">
-  <title>Store Products Report</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Store Products Report - Preview</title>
 </head>
 <body>
 <div class="print-container">
-  <div class="print-header">
-    <h1>STORE PRODUCTS REPORT</h1>
-    <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
-    <div class="print-actions">
-      <a href="/store-product" class="back-btn">← Back to list</a>
-      <button onclick="window.print()" class="print-btn">Print</button>
+    <div class="print-header">
+        <h1>STORE PRODUCTS REPORT</h1>
+        <p>Generated on <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
     </div>
-  </div>
 
-  <table class="print-table">
-    <thead>
-    <tr>
-      <th>UPC</th>
-      <th>Product Name</th>
-      <th>Characteristics</th>
-      <th>Selling Price (UAH)</th>
-      <th>Quantity</th>
-      <th>Promotional</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="sp : ${storeProducts}">
-      <td th:text="${sp.upc}"></td>
-      <td th:text="${sp.productName}"></td>
-      <td th:text="${sp.characteristics}"></td>
-      <td class="text-right" th:text="${#numbers.formatDecimal(sp.sellingPrice, 1, 2)}"></td>
-      <td th:text="${sp.productsNumber}"></td>
-      <td th:text="${sp.promotionalProduct ? 'Yes' : 'No'}"></td>
-    </tr>
-    </tbody>
-  </table>
+    <div class="print-actions">
+        <a href="/store-product" class="back-btn">← Back to list</a>
+        <button onclick="window.print()" class="print-btn">Print</button>
+    </div>
+
+    <div class="print-content">
+        <table class="print-table">
+            <thead>
+            <tr>
+                <th>UPC</th>
+                <th>Product Name</th>
+                <th>Characteristics</th>
+                <th>Selling Price (UAH)</th>
+                <th>Quantity</th>
+                <th>Promotional</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sp : ${storeProducts}">
+                <td th:text="${sp.upc}"></td>
+                <td th:text="${sp.productName}"></td>
+                <td th:text="${sp.characteristics}"></td>
+                <td th:text="${#numbers.formatDecimal(sp.sellingPrice, 1, 2)}"></td>
+                <td th:text="${sp.productsNumber}"></td>
+                <td th:text="${sp.promotionalProduct ? 'Yes' : 'No'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="print-footer">
+        <p>Zlagoda Supermarket - Store Products Report | Page 1</p>
+    </div>
 </div>
 </body>
 </html>
