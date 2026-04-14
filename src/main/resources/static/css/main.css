@@ -995,3 +995,29 @@ h2 {
     align-items: start;
     margin-bottom: 1.25rem;
 }
+
+.customer-cards-row {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    gap: 3rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+}
+
+.percent-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.percent-input-wrapper .form-control { padding-right: 2rem; }
+
+.percent-sign {
+    position: absolute;
+    right: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--secondary-light);
+    font-weight: 600;
+    pointer-events: none;
+}

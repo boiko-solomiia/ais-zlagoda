@@ -142,7 +142,6 @@
                 <td th:text="${#numbers.formatDecimal(check.vat, 1, 2) + ' грн'}"></td>
                 <td class="actions">
                     <a th:href="@{/check/info/{n}(n=${check.checkNumber})}" class="btn-edit">View</a>
-                    <a th:href="@{/check/edit/{n}(n=${check.checkNumber})}" class="btn-edit">Edit</a>
                     <form th:action="@{/check/delete/{n}(n=${check.checkNumber})}" method="post" class="inline-form">
                         <button type="submit" class="btn-delete"
                                 onclick="return confirm('Are you sure?')">Delete

@@ -171,50 +171,50 @@ public class CheckService {
         }
     }
 
-    public Response<Check> updateCheck(Check myCheck) {
-        List<String> errors = validateCheck(myCheck);
-        if (!errors.isEmpty()) {
-            return new Response<>(null, errors);
-        }
-
-        if (findCheckByNumber(myCheck.getCheckNumber()).getObject() == null) {
-            return new Response<>(null, Collections.singletonList("Can't update nonexistent check"));
-        }
-
-        double sumTotal = saleService.calculateSumTotal(myCheck.getCheckNumber());
-        double vat = sumTotal * 0.2;
-        myCheck.setSumTotal(sumTotal);
-        myCheck.setVat(vat);
-        String query = """
-                UPDATE my_check
-                SET id_employee = ?, card_number = ?, print_date = ?, sum_total = ?, vat = ?
-                WHERE check_number = ?
-                """;
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, myCheck.getIdEmployee());
-
-            if (myCheck.getCardNumber() == null || myCheck.getCardNumber().isBlank()) {
-                statement.setNull(2, Types.VARCHAR);
-            } else {
-                statement.setString(2, myCheck.getCardNumber());
-            }
-
-            statement.setTimestamp(3, Timestamp.valueOf(myCheck.getPrintDate()));
-            statement.setDouble(4, myCheck.getSumTotal());
-            statement.setDouble(5, myCheck.getVat());
-            statement.setString(6, myCheck.getCheckNumber());
-
-            int rows = statement.executeUpdate();
-            if (rows == 0) {
-                return new Response<>(null, Collections.singletonList("Failed to update check"));
-            }
-
-            return new Response<>(myCheck, new LinkedList<>());
-        } catch (SQLException e) {
-            return new Response<>(null, Collections.singletonList(e.getMessage()));
-        }
-    }
+//    public Response<Check> updateCheck(Check myCheck) {
+//        List<String> errors = validateCheck(myCheck);
+//        if (!errors.isEmpty()) {
+//            return new Response<>(null, errors);
+//        }
+//
+//        if (findCheckByNumber(myCheck.getCheckNumber()).getObject() == null) {
+//            return new Response<>(null, Collections.singletonList("Can't update nonexistent check"));
+//        }
+//
+//        double sumTotal = saleService.calculateSumTotal(myCheck.getCheckNumber());
+//        double vat = sumTotal * 0.2;
+//        myCheck.setSumTotal(sumTotal);
+//        myCheck.setVat(vat);
+//        String query = """
+//                UPDATE my_check
+//                SET id_employee = ?, card_number = ?, print_date = ?, sum_total = ?, vat = ?
+//                WHERE check_number = ?
+//                """;
+//
+//        try (PreparedStatement statement = connection.prepareStatement(query)) {
+//            statement.setString(1, myCheck.getIdEmployee());
+//
+//            if (myCheck.getCardNumber() == null || myCheck.getCardNumber().isBlank()) {
+//                statement.setNull(2, Types.VARCHAR);
+//            } else {
+//                statement.setString(2, myCheck.getCardNumber());
+//            }
+//
+//            statement.setTimestamp(3, Timestamp.valueOf(myCheck.getPrintDate()));
+//            statement.setDouble(4, myCheck.getSumTotal());
+//            statement.setDouble(5, myCheck.getVat());
+//            statement.setString(6, myCheck.getCheckNumber());
+//
+//            int rows = statement.executeUpdate();
+//            if (rows == 0) {
+//                return new Response<>(null, Collections.singletonList("Failed to update check"));
+//            }
+//
+//            return new Response<>(myCheck, new LinkedList<>());
+//        } catch (SQLException e) {
+//            return new Response<>(null, Collections.singletonList(e.getMessage()));
+//        }
+//    }
 
     public Response<Check> deleteCheck(String checkNumber) {
         if (findCheckByNumber(checkNumber).getObject() == null) {

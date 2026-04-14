@@ -160,20 +160,20 @@ public class CheckController {
         return "check-edit";
     }
 
-    @PostMapping("/edit")
-    public String editCheck(@ModelAttribute Check myCheck, Model model) {
-        Response<Check> response = checkService.updateCheck(myCheck);
-
-        if (!response.getErrors().isEmpty()) {
-            model.addAttribute("errors", response.getErrors());
-            model.addAttribute("check", myCheck);
-            model.addAttribute("employees", employeeService.findAllEmployees().getObject());
-            model.addAttribute("customerCards", customerCardService.findAll().getObject());
-            return "check-edit";
-        }
-
-        return "redirect:/check";
-    }
+//    @PostMapping("/edit")
+//    public String editCheck(@ModelAttribute Check myCheck, Model model) {
+//        Response<Check> response = checkService.updateCheck(myCheck);
+//
+//        if (!response.getErrors().isEmpty()) {
+//            model.addAttribute("errors", response.getErrors());
+//            model.addAttribute("check", myCheck);
+//            model.addAttribute("employees", employeeService.findAllEmployees().getObject());
+//            model.addAttribute("customerCards", customerCardService.findAll().getObject());
+//            return "check-edit";
+//        }
+//
+//        return "redirect:/check";
+//    }
 
     @PostMapping("/delete/{checkNumber}")
     public String deleteCheck(@PathVariable String checkNumber, Model model) {

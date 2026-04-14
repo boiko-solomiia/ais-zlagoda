@@ -1,55 +1,103 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
   <title>Edit customer card</title>
 </head>
-<body>
-<h2>Edit Customer Card</h2>
+<body class="customer-cards-page">
 
-<form th:action="@{/customer-card/edit}" method="post" th:object="${customerCard}">
-  <label>Card number:</label>
-  <input type="text" th:field="*{cardNumber}" readonly>
-  <br><br>
-
-  <label>Surname:</label>
-  <input type="text" th:field="*{custSurname}">
-  <br><br>
-
-  <label>Name:</label>
-  <input type="text" th:field="*{custName}">
-  <br><br>
-
-  <label>Patronymic:</label>
-  <input type="text" th:field="*{custPatronymic}">
-  <br><br>
-
-  <label>Phone number:</label>
-  <input type="text" th:field="*{phoneNumber}">
-  <br><br>
-
-  <label>City:</label>
-  <input type="text" th:field="*{city}">
-  <br><br>
-
-  <label>Street:</label>
-  <input type="text" th:field="*{street}">
-  <br><br>
-
-  <label>ZIP code:</label>
-  <input type="text" th:field="*{zipCode}">
-  <br><br>
-
-  <label>Percent:</label>
-  <input type="number" th:field="*{percent}">
-  <br><br>
-
-  <button type="submit">Update</button>
-</form>
-
-<div th:if="${errors}">
-  <p th:each="err : ${errors}" th:text="${err}"></p>
+<div class="navigation-bar">
+  <div class="navigation-links">
+    <a href="/">Home</a>
+    <a href="/product">Products</a>
+    <a href="/store-product">Store Products</a>
+    <a href="/category">Categories</a>
+    <a href="/employee">Employees</a>
+    <a href="/customer-card" class="active">Customer Cards</a>
+    <a href="/check">Checks</a>
+  </div>
+  <div class="account-menu">
+    <button class="account-btn">👤</button>
+    <div class="dropdown-menu">
+      <a href="/profile">My Profile</a>
+      <form th:action="@{/logout}" method="post" style="margin: 0;">
+        <button class="logout-btn" type="submit">Log Out</button>
+      </form>
+    </div>
+  </div>
 </div>
 
-<a th:href="@{/customer-card}">Back</a>
+<div class="main-content">
+  <div class="page-header">
+    <h1>Edit Customer Card</h1>
+  </div>
+
+  <form th:action="@{/customer-card/edit}" method="post" th:object="${customerCard}">
+    <div class="customer-cards-row">
+
+      <div class="form-card">
+        <h3 class="form-section-title">Personal information</h3>
+
+        <div class="form-field">
+          <label class="form-label">Card number</label>
+          <input type="text" th:field="*{cardNumber}" class="form-control form-control-readonly" readonly>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Surname</label>
+          <input type="text" th:field="*{custSurname}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Name</label>
+          <input type="text" th:field="*{custName}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Patronymic <span class="form-optional">(optional)</span></label>
+          <input type="text" th:field="*{custPatronymic}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Discount percent</label>
+          <div class="percent-input-wrapper">
+            <input type="number" th:field="*{percent}" class="form-control"
+                   min="0" max="100">
+            <span class="percent-sign">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3 class="form-section-title">Contact & address</h3>
+
+        <div class="form-field">
+          <label class="form-label">Phone number</label>
+          <input type="tel" th:field="*{phoneNumber}" class="form-control" placeholder="+380501234567">
+        </div>
+        <div class="form-field">
+          <label class="form-label">City <span class="form-optional">(optional)</span></label>
+          <input type="text" th:field="*{city}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Street <span class="form-optional">(optional)</span></label>
+          <input type="text" th:field="*{street}" class="form-control">
+        </div>
+        <div class="form-field">
+          <label class="form-label">ZIP code <span class="form-optional">(optional)</span></label>
+          <input type="text" th:field="*{zipCode}" class="form-control">
+        </div>
+      </div>
+
+    </div>
+
+    <div th:if="${errors}" class="errors-block">
+      <p th:each="err : ${errors}" th:text="${err}"></p>
+    </div>
+
+    <div class="form-actions">
+      <a th:href="@{/customer-card}" class="btn btn-sort">Cancel</a>
+      <button type="submit" class="btn btn-primary">Save changes</button>
+    </div>
+  </form>
+</div>
 </body>
 </html>

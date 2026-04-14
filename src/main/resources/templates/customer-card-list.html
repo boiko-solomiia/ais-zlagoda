@@ -85,19 +85,25 @@
         <table class="data-table">
             <thead>
             <tr>
-                <th>Card number</th>
                 <th>Full name</th>
                 <th>Phone number</th>
                 <th>Discount</th>
+                <th>Phone Number</th>
+                <th>City</th>
+                <th>Street</th>
+                <th>Zip Code</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="card : ${customerCards}">
-                <td th:text="${card.cardNumber}"></td>
                 <td th:text="${card.custSurname + ' ' + card.custName + ' ' + (card.custPatronymic != null ? card.custPatronymic : '')}"></td>
                 <td th:text="${card.phoneNumber}"></td>
                 <td th:text="${card.percent + '%'}"></td>
+                <td th:text="${card.phoneNumber}"></td>
+                <td th:text="${card.city}"></td>
+                <td th:text="${card.street}"></td>
+                <td th:text="${card.zipCode}"></td>
                 <td class="actions">
                     <a th:href="@{/customer-card/edit/{cardNumber}(cardNumber=${card.cardNumber})}" class="btn-edit">Edit</a>
                     <form th:action="@{/customer-card/delete/{cardNumber}(cardNumber=${card.cardNumber})}" method="post" class="inline-form">
