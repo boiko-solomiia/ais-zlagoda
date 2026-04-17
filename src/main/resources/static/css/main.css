@@ -904,6 +904,7 @@ h2 {
     accent-color: var(--primary-dark);
     cursor: pointer;
 }
+
 /*інформація про store product*/
 .info-card {
     background: var(--white);
@@ -975,9 +976,15 @@ h2 {
     white-space: nowrap;
 }
 
-.form-optional { font-weight: 400; font-size: 0.8rem; color: var(--text-light); }
+.form-optional {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
 
-.form-field:last-child { margin-bottom: 0; }
+.form-field:last-child {
+    margin-bottom: 0;
+}
 
 .form-section-title {
     font-size: 0.9rem;
@@ -1029,7 +1036,9 @@ h2 {
     align-items: center;
 }
 
-.percent-input-wrapper .form-control { padding-right: 2rem; }
+.percent-input-wrapper .form-control {
+    padding-right: 2rem;
+}
 
 .percent-sign {
     position: absolute;
@@ -1045,21 +1054,25 @@ h2 {
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
+
 .info-item {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
 }
+
 .info-label {
     font-size: 0.85rem;
     color: var(--text-light);
     font-weight: 500;
 }
+
 .info-value {
     font-size: 1.1rem;
     color: var(--secondary-dark);
     font-weight: 600;
 }
+
 .table-card {
     background: var(--white);
     padding: 1.5rem;
@@ -1070,6 +1083,51 @@ h2 {
 
 .small-info {
     color: var(--secondary-light);
+}
+
+.sales-table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+}
+
+.sales-table th, .sales-table td {
+    border: 1px solid var(--secondary-light);
+    padding: 8px;
+    text-align: center;
+}
+
+.sales-table th {
+    background: var(--secondary-very-light);
+}
+
+.remove-row-btn {
+    background: var(--primary-very-light);
+    color: var(--primary-dark);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.add-row-btn {
+    margin-top: 0.5rem;
+    background: var(--secondary-very-light);
+}
+
+.form-card {
+    max-width: 800px;
+}
+
+.stock-info {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    display: block;
+}
+
+.error-stock {
+    color: var(--primary-dark);
+    font-size: 0.7rem;
 }
 
 .print-container {

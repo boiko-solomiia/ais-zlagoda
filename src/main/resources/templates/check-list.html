@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <script th:src="@{/js/check-list.js}"></script>
     <title>Checks</title>
 </head>
 <body class="checks-page">
@@ -167,14 +168,5 @@
         </table>
     </div>
 </div>
-
-<script>
-    function filterToday() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('dateFrom').value = today;
-        document.getElementById('dateTo').value = today;
-        document.getElementById('filter-form').submit();
-    }
-</script>
 </body>
 </html>

@@ -1,47 +1,127 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Add check</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Add Check</title>
+    <script th:src="@{/js/check-add.js}"></script>
 </head>
-<body>
-<h2>Add Check</h2>
-
-<form th:action="@{/check/add}" method="post" th:object="${check}">
-    <label>Check number:</label>
-    <input type="text" th:field="*{checkNumber}">
-    <br><br>
-
-    <label>Employee:</label>
-    <select th:field="*{idEmployee}">
-        <option value=""> Select employee </option>
-        <option th:each="employee : ${employees}"
-                th:value="${employee.idEmployee}"
-                th:text="${employee.emplSurname + ' ' + employee.emplName + ' (' + employee.idEmployee + ')'}">
-        </option>
-    </select>
-    <br><br>
-
-    <label>Customer card:</label>
-    <select th:field="*{cardNumber}">
-        <option value=""> No card </option>
-        <option th:each="card : ${customerCards}"
-                th:value="${card.cardNumber}"
-                th:text="${card.cardNumber}">
-        </option>
-    </select>
-    <br><br>
-
-    <label>Print date:</label>
-    <input type="datetime-local" th:field="*{printDate}">
-    <br><br>
-
-    <button type="submit">Save</button>
-</form>
-
-<div th:if="${errors}">
-    <p th:each="err : ${errors}" th:text="${err}"></p>
+<body class="checks-page">
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check" class="active">Checks</a>
+    </div>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<a th:href="@{/check}">Back</a>
+<div class="main-content">
+    <div class="page-header"><h1>Add Check</h1></div>
+    <div class="form-card">
+        <form th:action="@{/check/add-with-sales}" method="post" th:object="${check}" id="checkForm">
+            <input type="hidden" th:field="*{sumTotal}"/>
+            <input type="hidden" th:field="*{vat}"/>
+
+            <div class="form-field">
+                <label class="form-label">Check Number</label>
+                <input type="text" th:field="*{checkNumber}" class="form-control" required>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Employee (cashier only)</label>
+                <div class="select-wrapper">
+                    <select th:field="*{idEmployee}" class="category-select form-control" required>
+                        <option value="">Select cashier</option>
+                        <option th:each="emp : ${employees}"
+                                th:value="${emp.idEmployee}"
+                                th:text="${emp.emplSurname + ' ' + emp.emplName + ' (' + emp.idEmployee + ')'}">
+                        </option>
+                    </select>
+                    <span class="select-arrow">&#8964;</span>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Customer Card (optional)</label>
+                <div class="select-wrapper">
+                    <select th:field="*{cardNumber}" class="category-select form-control">
+                        <option value="">No card</option>
+                        <option th:each="card : ${customerCards}"
+                                th:value="${card.cardNumber}"
+                                th:text="${card.cardNumber + ' - ' + card.custSurname + ' ' + card.custName}">
+                        </option>
+                    </select>
+                    <span class="select-arrow">&#8964;</span>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Print Date & Time</label>
+                <input type="datetime-local" th:field="*{printDate}" class="form-control" required>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Products (Sales)</label>
+                <table class="sales-table" id="salesTable">
+                    <thead>
+                    <tr>
+                        <th>Product (UPC)</th>
+                        <th>Quantity</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="salesRows">
+                    <tr>
+                        <td>
+                            <div class="select-wrapper">
+                                <select name="upc" class="category-select form-control product-select"
+                                        style="min-width: 220px;" required>
+                                    <option value="">Select product</option>
+                                    <option th:each="p : ${products}"
+                                            th:value="${p.upc}"
+                                            th:text="${p.productName + ' (' + p.upc + ') - ' + p.sellingPrice + 'грн'}"
+                                            th:data-stock="${p.productsNumber}">
+                                    </option>
+                                </select>
+                                <span class="select-arrow">&#8964;</span>
+                            </div>
+                            <span class="stock-info"></span>
+                        </td>
+                        <td><input type="number" name="quantity" class="form-control quantity-input" min="1" value="1"
+                                   required></td>
+                        <td>
+                            <button type="button" class="remove-row-btn" onclick="removeRow(this)">✖</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-secondary add-row-btn" onclick="addRow()">+ Add product</button>
+            </div>
+
+            <div th:if="${errors}" class="errors-block">
+                <p th:each="err : ${errors}" th:text="${err}"></p>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/check}" class="btn btn-sort">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Check</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

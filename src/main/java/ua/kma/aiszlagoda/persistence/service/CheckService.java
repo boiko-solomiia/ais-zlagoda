@@ -74,10 +74,12 @@ public class CheckService {
             return new Response<>(null, errors);
         }
 
-        double sumTotal = saleService.calculateSumTotal(myCheck.getCheckNumber());
-        double vat = sumTotal * 0.2;
-        myCheck.setSumTotal(sumTotal);
-        myCheck.setVat(vat);
+        if (myCheck.getSumTotal() == null) {
+            double sumTotal = saleService.calculateSumTotal(myCheck.getCheckNumber());
+            double vat = sumTotal * 0.2;
+            myCheck.setSumTotal(sumTotal);
+            myCheck.setVat(vat);
+        }
 
         String query = "INSERT INTO my_check (check_number, id_employee, card_number, print_date, sum_total, vat) VALUES (?, ?, ?, ?, ?, ?)";
 
