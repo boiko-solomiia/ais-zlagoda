@@ -118,6 +118,18 @@ public class StoreProductService {
         }
         try {
             connection.setAutoCommit(false);
+            if (!storeProduct.isPromotionalProduct()) {
+                StoreProduct existingRegular = findByProductIdAndPromotional(storeProduct.getProductId(), false);
+                if (existingRegular != null) {
+                    int updatedQuantity = existingRegular.getProductsNumber() + storeProduct.getProductsNumber();
+                    updatePriceAndQuantity(existingRegular.getUpc(), storeProduct.getSellingPrice(), updatedQuantity);
+                    updatePromoPrice(existingRegular.getUpcProm(), storeProduct.getSellingPrice());
+                    existingRegular.setSellingPrice(storeProduct.getSellingPrice());
+                    existingRegular.setProductsNumber(updatedQuantity);
+                    connection.commit();
+                    return new Response<>(existingRegular, new LinkedList<>());
+                }
+            }
             if (existsByProductIdAndPromotional(storeProduct.getProductId(), storeProduct.isPromotionalProduct(), null)) {
                 return new Response<>(null, Collections.singletonList("For this product, a store product of this type already exists"));
             }
@@ -578,6 +590,66 @@ public class StoreProductService {
             ResultSet res = statement.executeQuery();
             res.next();
             return res.getInt(1) > 0;
+        }
+    }
+
+    private StoreProduct findByProductIdAndPromotional(Integer productId, boolean promotional) throws SQLException {
+        String query = """
+            SELECT *
+            FROM store_product
+            WHERE product_id = ? AND promotional_product = ?
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+            statement.setBoolean(2, promotional);
+
+            ResultSet res = statement.executeQuery();
+            if (res.next()) {
+                return storeProductFromResultSet(res);
+            }
+            return null;
+        }
+    }
+
+    private void updatePriceAndQuantity(String upc, double newPrice, int newQuantity) throws SQLException {
+        String query = """
+            UPDATE store_product
+            SET selling_price = ?, products_number = ?
+            WHERE upc = ?
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setDouble(1, newPrice);
+            statement.setInt(2, newQuantity);
+            statement.setString(3, upc);
+
+            int rows = statement.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("Failed to update store product during restock");
+            }
+        }
+    }
+
+    private void updatePromoPrice(String promoUpc, double regularPrice) throws SQLException {
+        if (promoUpc == null || promoUpc.isBlank()) {
+            return;
+        }
+
+        String query = """
+            UPDATE store_product
+            SET selling_price = ?
+            WHERE upc = ?
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setDouble(1, regularPrice * 0.8);
+            statement.setString(2, promoUpc);
+
+            int rows = statement.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("Failed to update promotional store product during restock");
+            }
         }
     }
 }
