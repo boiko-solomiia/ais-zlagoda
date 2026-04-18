@@ -29,7 +29,9 @@ CREATE TABLE IF NOT EXISTS store_product (
     CONSTRAINT fk_store_product_product
     FOREIGN KEY (product_id) REFERENCES product(product_id)
     ON DELETE NO ACTION
-    ON UPDATE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT unique_product_promo
+    UNIQUE (product_id, promotional_product)
 );
 
 

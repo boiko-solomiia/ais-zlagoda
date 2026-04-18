@@ -111,13 +111,19 @@ public class StoreProductService {
         }
     }
 
-    public Response<StoreProduct> createStoreProduct(StoreProduct storeProduct) {
+    public Response<StoreProduct> createStoreProduct(StoreProduct storeProduct) throws SQLException {
         List<String> errors = validateStoreProduct(storeProduct);
         if (!errors.isEmpty()) {
             return new Response<>(null, errors);
         }
         try {
             connection.setAutoCommit(false);
+            if (existsByProductIdAndPromotional(storeProduct.getProductId(), storeProduct.isPromotionalProduct(), null)) {
+                return new Response<>(null, Collections.singletonList("For this product, a store product of this type already exists"));
+            }
+            if (!storeProduct.isPromotionalProduct() && storeProduct.getUpcProm() != null && !storeProduct.getUpcProm().isBlank() && existsByProductIdAndPromotional(storeProduct.getProductId(), true, null)) {
+                return new Response<>(null, Collections.singletonList("Promotional store product for this product already exists"));
+            }
             if (!storeProduct.isPromotionalProduct() &&
                     storeProduct.getUpcProm() != null &&
                     !storeProduct.getUpcProm().isBlank()) {
@@ -159,6 +165,16 @@ public class StoreProductService {
         try {
             connection.setAutoCommit(false);
 
+            if (existsByProductIdAndPromotional(storeProduct.getProductId(), storeProduct.isPromotionalProduct(), storeProduct.getUpc())) {
+                return new Response<>(null, Collections.singletonList("For this product, another store product of this type already exists"));
+            }
+
+            if (!storeProduct.isPromotionalProduct() &&
+                storeProduct.getUpcProm() != null &&
+                !storeProduct.getUpcProm().isBlank() &&
+                existsByProductIdAndPromotional(storeProduct.getProductId(), true, storeProduct.getUpcProm())) {
+                return new Response<>(null, Collections.singletonList("For this product, another promotional store product already exists"));
+            }
             String query = """
                         UPDATE store_product
                         SET upc_prom = ?, product_id = ?, selling_price = ?, products_number = ?, promotional_product = ?
@@ -541,6 +557,27 @@ public class StoreProductService {
             return new Response<>(products, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private boolean existsByProductIdAndPromotional(Integer productId, boolean promotional, String upc) throws SQLException {
+        String query = """
+            SELECT COUNT(*)
+            FROM store_product
+            WHERE product_id = ?
+              AND promotional_product = ?
+              AND (? IS NULL OR upc <> ?)
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+            statement.setBoolean(2, promotional);
+            statement.setString(3, upc);
+            statement.setString(4, upc);
+
+            ResultSet res = statement.executeQuery();
+            res.next();
+            return res.getInt(1) > 0;
         }
     }
 }

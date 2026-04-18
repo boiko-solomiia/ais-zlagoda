@@ -7,6 +7,7 @@ import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
 import ua.kma.aiszlagoda.persistence.service.StoreProductService;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @Controller
@@ -45,7 +46,7 @@ public class StoreProductController {
     }
 
     @PostMapping("/add")
-    public String addStoreProduct(@ModelAttribute StoreProduct storeProduct, Model model) {
+    public String addStoreProduct(@ModelAttribute StoreProduct storeProduct, Model model) throws SQLException {
         Response<StoreProduct> response = storeProductService.createStoreProduct(storeProduct);
 
         if (!response.getErrors().isEmpty()) {
