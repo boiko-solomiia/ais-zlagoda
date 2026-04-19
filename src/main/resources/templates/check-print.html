@@ -26,6 +26,7 @@
                 <th>Cashier (ID)</th>
                 <th>Customer (Card)</th>
                 <th>Print Date</th>
+                <th>Discount</th>
                 <th>Total (UAH)</th>
                 <th>VAT (UAH)</th>
             </tr>
@@ -40,6 +41,11 @@
                     <span th:unless="${ch.cardNumber != null}">—</span>
                 </td>
                 <td th:text="${#temporals.format(ch.printDate, 'dd.MM.yyyy HH:mm')}"></td>
+                <td>
+                    <span th:if="${ch.cardNumber != null and ch.discountPercent != null and ch.discountPercent > 0}"
+                          th:text="${ch.discountPercent + '%'}"></span>
+                    <span th:unless="${ch.cardNumber != null and ch.discountPercent != null and ch.discountPercent > 0}">—</span>
+                </td>
                 <td th:text="${#numbers.formatDecimal(ch.sumTotal, 1, 2)}"></td>
                 <td th:text="${#numbers.formatDecimal(ch.vat, 1, 2)}"></td>
             </tr>

@@ -20,4 +20,5 @@ public class CheckDTO {
     private LocalDateTime printDate;
     private Double sumTotal;
     private Double vat;
+    private Integer discountPercent;
 }

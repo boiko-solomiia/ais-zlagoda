@@ -47,6 +47,15 @@
             <span class="chip-label">Date</span>
             <span class="chip-value" th:text="${#temporals.format(check.printDate, 'dd.MM.yyyy HH:mm')}"></span>
         </div>
+
+        <div class="info-chip">
+            <span class="chip-label">Discount</span>
+            <span class="chip-value"
+                  th:if="${check.cardNumber != null and check.discountPercent != null and check.discountPercent > 0}"
+                  th:text="${check.discountPercent + '%'}"></span>
+            <span class="chip-value" th:unless="${check.cardNumber != null and check.discountPercent != null and check.discountPercent > 0}">—</span>
+        </div>
+
         <div class="info-chip chip-name">
             <span class="chip-label">Total</span>
             <span class="chip-value" th:text="${#numbers.formatDecimal(check.sumTotal, 1, 2) + ' грн'}"></span>

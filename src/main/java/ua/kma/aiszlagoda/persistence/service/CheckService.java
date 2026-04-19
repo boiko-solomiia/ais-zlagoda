@@ -5,6 +5,7 @@ import ua.kma.aiszlagoda.persistence.model.Check;
 import ua.kma.aiszlagoda.persistence.model.CheckDTO;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.model.SaleRequest;
+import ua.kma.aiszlagoda.persistence.model.CustomerCard;
 
 import java.time.LocalDateTime;
 import java.sql.*;
@@ -17,10 +18,12 @@ public class CheckService {
 
     private final Connection connection;
     private final SaleService saleService;
+    private final CustomerCardService customerCardService;
 
-    public CheckService(Connection connection, SaleService saleService) {
+    public CheckService(Connection connection, SaleService saleService, CustomerCardService customerCardService) {
         this.connection = connection;
         this.saleService = saleService;
+        this.customerCardService = customerCardService;
     }
 
     private Check getCheckFromResultSet(ResultSet rs) throws SQLException {
@@ -49,6 +52,8 @@ public class CheckService {
         dto.setPrintDate(ts != null ? ts.toLocalDateTime() : null);
         dto.setSumTotal(rs.getDouble("sum_total"));
         dto.setVat(rs.getDouble("vat"));
+        int percent = rs.getInt("discount_percent");
+        dto.setDiscountPercent(rs.wasNull() ? null : percent);
         return dto;
     }
 
@@ -121,6 +126,19 @@ public class CheckService {
             }
 
             double total = totalResponse.getObject();
+
+            if (myCheck.getCardNumber() != null && !myCheck.getCardNumber().isBlank()) {
+                Response<CustomerCard> cardResponse = customerCardService.findCustomerCardByNumber(myCheck.getCardNumber());
+                if (!cardResponse.getErrors().isEmpty() || cardResponse.getObject() == null) {
+                    connection.rollback();
+                    return new Response<>(null, List.of("Customer card not found or invalid"));
+                }
+                int percent = cardResponse.getObject().getPercent();
+                if (percent > 0) {
+                    total = total * (100 - percent) / 100;
+                }
+            }
+
             myCheck.setSumTotal(total);
             myCheck.setVat(total * 0.2);
 
@@ -148,8 +166,9 @@ public class CheckService {
     public Response<List<CheckDTO>> findAllDTO() {
         List<CheckDTO> checks = new LinkedList<>();
         String query = "SELECT c.*, " +
-                "TRIM(CONCAT(e.empl_surname, ' ', e.empl_name, ' ', IFNULL(e.empl_patronymic, ''))) as employee_name, " +
-                "TRIM(CONCAT(IFNULL(cc.cust_surname, ''), ' ', IFNULL(cc.cust_name, ''))) as customer_name " +
+                "TRIM(CONCAT(e.empl_surname, ' ', e.empl_name)) as employee_name, " +
+                "TRIM(CONCAT(IFNULL(cc.cust_surname, ''), ' ', IFNULL(cc.cust_name, ''))) as customer_name, " +
+                "cc.percent AS discount_percent " +
                 "FROM my_check c " +
                 "JOIN employee e ON c.id_employee = e.id_employee " +
                 "LEFT JOIN customer_card cc ON c.card_number = cc.card_number " +
@@ -169,8 +188,9 @@ public class CheckService {
     public Response<List<CheckDTO>> findChecksDTOByEmployeeAndPeriod(String idEmployee, LocalDateTime start, LocalDateTime end) {
         List<CheckDTO> checks = new LinkedList<>();
         String query = "SELECT c.*, " +
-                "TRIM(CONCAT(e.empl_surname, ' ', e.empl_name, ' ', IFNULL(e.empl_patronymic, ''))) as employee_name, " +
-                "TRIM(CONCAT(IFNULL(cc.cust_surname, ''), ' ', IFNULL(cc.cust_name, ''))) as customer_name " +
+                "TRIM(CONCAT(e.empl_surname, ' ', e.empl_name)) as employee_name, " +
+                "TRIM(CONCAT(IFNULL(cc.cust_surname, ''), ' ', IFNULL(cc.cust_name, ''))) as customer_name, " +
+                "cc.percent AS discount_percent " +
                 "FROM my_check c " +
                 "JOIN employee e ON c.id_employee = e.id_employee " +
                 "LEFT JOIN customer_card cc ON c.card_number = cc.card_number " +
@@ -194,8 +214,9 @@ public class CheckService {
     public Response<List<CheckDTO>> findChecksDTOByPeriod(LocalDateTime start, LocalDateTime end) {
         List<CheckDTO> checks = new LinkedList<>();
         String query = "SELECT c.*, " +
-                "TRIM(CONCAT(e.empl_surname, ' ', e.empl_name, ' ', IFNULL(e.empl_patronymic, ''))) as employee_name, " +
-                "TRIM(CONCAT(IFNULL(cc.cust_surname, ''), ' ', IFNULL(cc.cust_name, ''))) as customer_name " +
+                "TRIM(CONCAT(e.empl_surname, ' ', e.empl_name)) as employee_name, " +
+                "TRIM(CONCAT(IFNULL(cc.cust_surname, ''), ' ', IFNULL(cc.cust_name, ''))) as customer_name, " +
+                "cc.percent AS discount_percent " +
                 "FROM my_check c " +
                 "JOIN employee e ON c.id_employee = e.id_employee " +
                 "LEFT JOIN customer_card cc ON c.card_number = cc.card_number " +
@@ -221,6 +242,27 @@ public class CheckService {
             stmt.setString(1, num);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return new Response<>(getCheckFromResultSet(rs), new LinkedList<>());
+            return new Response<>(null, Collections.singletonList("Check not found"));
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<CheckDTO> findCheckDTOByNumber(String num) {
+        String query = "SELECT c.*, " +
+                "TRIM(CONCAT(e.empl_surname, ' ', e.empl_name)) as employee_name, " +
+                "TRIM(CONCAT(IFNULL(cc.cust_surname, ''), ' ', IFNULL(cc.cust_name, ''))) as customer_name, " +
+                "cc.percent AS discount_percent " +
+                "FROM my_check c " +
+                "JOIN employee e ON c.id_employee = e.id_employee " +
+                "LEFT JOIN customer_card cc ON c.card_number = cc.card_number " +
+                "WHERE c.check_number = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, num);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Response<>(getCheckDTOFromResultSet(rs), new LinkedList<>());
+            }
             return new Response<>(null, Collections.singletonList("Check not found"));
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));

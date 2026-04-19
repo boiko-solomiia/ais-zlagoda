@@ -1178,6 +1178,17 @@ h2 {
     margin-top: 2rem;
 }
 
+.discount-info {
+    background: var(--secondary-very-light);
+    border-left: 4px solid var(--primary-dark);
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    border-radius: var(--border-radius-md);
+}
+.discount-info p {
+    margin: 0.25rem 0;
+}
+
 .print-container {
     max-width: 1200px;
     margin: 0 auto;

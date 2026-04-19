@@ -1,3 +1,37 @@
+function calculateSubtotal() {
+    let subtotal = 0;
+    document.querySelectorAll('#salesRows tr').forEach(row => {
+        const select = row.querySelector('select[name="upc"]');
+        const qty = row.querySelector('.quantity-input');
+        if (select && select.value && qty && qty.value) {
+            const price = parseFloat(select.options[select.selectedIndex].getAttribute('data-price')) || 0;
+            subtotal += price * (parseInt(qty.value) || 0);
+        }
+    });
+    return subtotal;
+}
+
+function getDiscountPercent() {
+    const cardSelect = document.querySelector('select[name="cardNumber"]');
+    if (!cardSelect || !cardSelect.value) return 0;
+    const opt = cardSelect.options[cardSelect.selectedIndex];
+    return parseInt(opt.getAttribute('data-percent')) || 0;
+}
+
+function updateDiscountLine() {
+    const subtotal = calculateSubtotal();
+    const percent = getDiscountPercent();
+    const discountLine = document.getElementById('discountLine');
+    const discountText = document.getElementById('discountText');
+    if (percent > 0 && subtotal > 0) {
+        const discountAmount = subtotal * percent / 100;
+        discountText.textContent = `Discount (${percent}%): - ${discountAmount.toFixed(2)} грн`;
+        discountLine.style.display = 'block';
+    } else {
+        discountLine.style.display = 'none';
+    }
+}
+
 function isUPCAlreadySelected(upc, currentRow) {
     const selects = document.querySelectorAll('#salesRows select[name="upc"]');
     for (let select of selects) {
@@ -61,17 +95,21 @@ function addRow() {
             alert("This product is already added. Please change quantity in the existing row.");
             this.value = "";
             updateStockInfo(this);
+            updateDiscountLine();
             return;
         }
         updateStockInfo(this);
+        updateDiscountLine();
     });
     newQty.addEventListener('input', function() {
         const select = this.closest('tr').querySelector('select[name="upc"]');
         const selectedOption = select.options[select.selectedIndex];
         const stock = selectedOption.getAttribute('data-stock') || 0;
         validateQuantity(this, stock);
+        updateDiscountLine();
     });
     updateStockInfo(newSelect);
+    updateDiscountLine();
 }
 
 function removeRow(btn) {
@@ -81,6 +119,7 @@ function removeRow(btn) {
     } else {
         alert("You must keep at least one product row");
     }
+    updateDiscountLine();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -91,11 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert("This product is already added. Please change quantity in the existing row.");
                 this.value = "";
                 updateStockInfo(this);
+                updateDiscountLine();
                 return;
             }
             updateStockInfo(this);
+            updateDiscountLine();
         });
         updateStockInfo(select);
+        const cardSelect = document.querySelector('select[name="cardNumber"]');
+        if (cardSelect) cardSelect.addEventListener('change', updateDiscountLine);
     });
     const quantities = document.querySelectorAll('#salesRows .quantity-input');
     quantities.forEach(qty => {
@@ -104,6 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedOption = select.options[select.selectedIndex];
             const stock = selectedOption.getAttribute('data-stock') || 0;
             validateQuantity(this, stock);
+            updateDiscountLine();
         });
     });
+
+    const cardSelect = document.querySelector('select[name="cardNumber"]');
+    if (cardSelect) {
+        cardSelect.addEventListener('change', updateDiscountLine);
+    }
+    updateDiscountLine();
 });

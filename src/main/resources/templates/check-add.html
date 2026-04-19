@@ -62,7 +62,8 @@
                         <option value="">No card</option>
                         <option th:each="card : ${customerCards}"
                                 th:value="${card.cardNumber}"
-                                th:text="${card.cardNumber + ' - ' + card.custSurname + ' ' + card.custName}">
+                                th:text="${card.custSurname + ' ' + card.custName + ' (' + card.cardNumber + ')' + ' - ' + card.percent + '%' }"
+                                th:data-percent="${card.percent}">
                         </option>
                     </select>
                     <span class="select-arrow">&#8964;</span>
@@ -94,7 +95,8 @@
                                     <option th:each="p : ${products}"
                                             th:value="${p.upc}"
                                             th:text="${p.productName + ' (' + p.upc + ') - ' + p.sellingPrice + 'грн'}"
-                                            th:data-stock="${p.productsNumber}">
+                                            th:data-stock="${p.productsNumber}"
+                                            th:data-price="${p.sellingPrice}">
                                     </option>
                                 </select>
                                 <span class="select-arrow">&#8964;</span>
@@ -109,6 +111,11 @@
                     </tr>
                     </tbody>
                 </table>
+
+                <div id="discountLine" style="margin-top: 0.5rem; text-align: right; font-weight: bold; color: var(--primary-dark); display: none;">
+                    <span id="discountText"></span>
+                </div>
+
                 <button type="button" class="btn btn-secondary add-row-btn" onclick="addRow()">+ Add product</button>
             </div>
 

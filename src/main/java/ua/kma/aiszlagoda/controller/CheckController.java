@@ -87,7 +87,7 @@ public class CheckController {
 
     @GetMapping("/info/{checkNumber}")
     public String checkInfo(@PathVariable String checkNumber, Model model) {
-        Response<Check> checkResponse = checkService.findCheckByNumber(checkNumber);
+        Response<CheckDTO> checkResponse = checkService.findCheckDTOByNumber(checkNumber);
 
         if (!checkResponse.getErrors().isEmpty() || checkResponse.getObject() == null) {
             model.addAttribute("errors", checkResponse.getErrors());

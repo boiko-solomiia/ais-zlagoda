@@ -154,7 +154,13 @@
                            th:text="${check.customerFullName}"></small>
                 </td>
                 <td th:text="${#temporals.format(check.printDate, 'dd.MM.yyyy HH:mm')}"></td>
-                <td th:text="${#numbers.formatDecimal(check.sumTotal, 1, 2) + ' грн'}"></td>
+                <td>
+                    <span th:text="${#numbers.formatDecimal(check.sumTotal, 1, 2) + ' грн'}"></span>
+                    <br/>
+                    <small class="small-info"
+                           th:if="${check.cardNumber != null and check.discountPercent != null and check.discountPercent > 0}"
+                           th:text="${check.discountPercent + '% discount'}"></small>
+                </td>
                 <td th:text="${#numbers.formatDecimal(check.vat, 1, 2) + ' грн'}"></td>
                 <td class="actions">
                     <a th:href="@{/check/info/{id}(id=${check.checkNumber})}" class="btn-edit">View</a>
