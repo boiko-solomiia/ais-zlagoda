@@ -35,12 +35,16 @@
   </div>
 
   <form th:action="@{/employee/edit}" method="post" th:object="${employee}" class="employee-form">
-    <input type="hidden" th:field="*{idEmployee}">
 
     <div class="cards-row">
 
       <div class="form-card">
         <h3 class="form-section-title">Personal information</h3>
+
+        <div class="form-field">
+          <label class="form-label form-label-readonly">Employee ID</label>
+          <input type="text" th:field="*{idEmployee}" class="form-control form-control-readonly" readonly>
+        </div>
 
         <div class="form-field">
           <label class="form-label">Surname</label>

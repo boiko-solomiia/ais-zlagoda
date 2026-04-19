@@ -36,7 +36,11 @@
 
     <div class="form-card">
         <form th:action="@{/product/edit}" method="post" th:object="${product}">
-            <input type="hidden" th:field="*{productId}">
+
+            <div class="form-field">
+                <label class="form-label form-label-readonly">Product ID</label>
+                <input type="text" th:field="*{productId}" class="form-control form-control-readonly" readonly>
+            </div>
 
             <div class="form-field">
                 <label class="form-label">Category</label>

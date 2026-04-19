@@ -38,7 +38,7 @@
         <form th:action="@{/store-product/edit}" method="post" th:object="${storeProduct}">
 
             <div class="form-field">
-                <label class="form-label">UPC</label>
+                <label class="form-label form-label-readonly">UPC</label>
                 <input type="text" th:field="*{upc}" class="form-control form-control-readonly" readonly>
             </div>
 
