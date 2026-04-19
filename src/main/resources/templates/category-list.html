@@ -67,6 +67,7 @@
     <div th:unless="${categories == null or #lists.isEmpty(categories)}" class="category-grid">
         <div th:each="cat : ${categories}" class="category-card">
             <span class="category-name" th:text="${cat.categoryName}"></span>
+            <small class="category-number" th:text="${cat.categoryNumber}"></small>
             <div class="category-actions">
                 <a th:href="@{/category/edit/{id}(id=${cat.categoryNumber})}" class="btn-edit">Edit</a>
                 <form th:action="@{/category/delete/{id}(id=${cat.categoryNumber})}" method="post" class="inline-form">

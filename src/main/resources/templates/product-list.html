@@ -90,6 +90,7 @@
         <table class="data-table">
             <thead>
             <tr>
+                <th>ID</th>
                 <th>Name</th>
                 <th>Manufacturer</th>
                 <th>Characteristics</th>
@@ -99,6 +100,7 @@
             </thead>
             <tbody>
             <tr th:each="product : ${products}">
+                <td th:text="${product.productId}"></td>
                 <td th:text="${product.productName}"></td>
                 <td th:text="${product.manufacturer}"></td>
                 <td th:text="${product.characteristics}"></td>

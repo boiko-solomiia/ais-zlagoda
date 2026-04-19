@@ -86,6 +86,7 @@
         <table class="data-table">
             <thead>
             <tr>
+                <th>Card Number</th>
                 <th>Full name</th>
                 <th>Phone number</th>
                 <th>Discount</th>
@@ -98,6 +99,7 @@
             </thead>
             <tbody>
             <tr th:each="card : ${customerCards}">
+                <td th:text="${card.cardNumber}"></td>
                 <td th:text="${card.custSurname + ' ' + card.custName + ' ' + (card.custPatronymic != null ? card.custPatronymic : '')}"></td>
                 <td th:text="${card.phoneNumber}"></td>
                 <td th:text="${card.percent + '%'}"></td>
