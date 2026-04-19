@@ -1,15 +1,53 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <title>Error</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Error Occurred</title>
 </head>
-<body>
-<h2>Error</h2>
+<body class="error-page">
 
-<div th:if="${errors}">
-  <p th:each="err : ${errors}" th:text="${err}"></p>
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<a th:href="@{/category}">Back to categories</a>
+<div class="main-content">
+    <div class="error-container">
+        <div class="page-header">
+            <h1>Oops! Something went wrong</h1>
+        </div>
+
+        <div th:if="${errors != null and !errors.isEmpty()}" class="error-message-list">
+            <p th:each="err : ${errors}" th:text="${err}"></p>
+        </div>
+        <div th:unless="${errors != null and !errors.isEmpty()}" class="error-message-list">
+            <p>An unexpected error occurred. Please try again later.</p>
+        </div>
+
+        <div class="error-actions">
+            <button onclick="history.back()" class="back-btn">← Go Back</button>
+            <a href="/" class="print-btn">Go Home</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
