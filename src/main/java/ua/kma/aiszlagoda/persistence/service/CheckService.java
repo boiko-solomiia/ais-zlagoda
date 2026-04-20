@@ -6,6 +6,7 @@ import ua.kma.aiszlagoda.persistence.model.CheckDTO;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.model.SaleRequest;
 import ua.kma.aiszlagoda.persistence.model.CustomerCard;
+import ua.kma.aiszlagoda.persistence.model.Employee;
 
 import java.time.LocalDateTime;
 import java.sql.*;
@@ -19,11 +20,13 @@ public class CheckService {
     private final Connection connection;
     private final SaleService saleService;
     private final CustomerCardService customerCardService;
+    private final EmployeeService employeeService;
 
-    public CheckService(Connection connection, SaleService saleService, CustomerCardService customerCardService) {
+    public CheckService(Connection connection, SaleService saleService, CustomerCardService customerCardService, EmployeeService employeeService) {
         this.connection = connection;
         this.saleService = saleService;
         this.customerCardService = customerCardService;
+        this.employeeService = employeeService;
     }
 
     private Check getCheckFromResultSet(ResultSet rs) throws SQLException {
@@ -69,6 +72,16 @@ public class CheckService {
             errors.add("Print date can't be empty");
         } else if (myCheck.getPrintDate().isAfter(LocalDateTime.now())) {
             errors.add("Print date can't be in the future");
+        }
+        if (myCheck.getIdEmployee() != null && !myCheck.getIdEmployee().isBlank()
+            && myCheck.getPrintDate() != null) {
+            Response<Employee> employeeResponse = employeeService.findEmployeeById(myCheck.getIdEmployee());
+            Employee employee = employeeResponse.getObject();
+            if (employee == null) {
+                errors.add("Employee not found");
+            } else if (myCheck.getPrintDate().toLocalDate().isBefore(employee.getDateOfStart())) {
+                errors.add("Print date can't be earlier than employee start date");
+            }
         }
         return errors;
     }
