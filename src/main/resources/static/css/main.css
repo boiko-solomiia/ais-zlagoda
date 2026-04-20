@@ -1185,8 +1185,17 @@ h2 {
     margin-top: 1rem;
     border-radius: var(--border-radius-md);
 }
+
 .discount-info p {
     margin: 0.25rem 0;
+}
+
+#discount-line {
+    margin-top: 0.5rem;
+    text-align: right;
+    font-weight: bold;
+    color: var(--primary-dark);
+    display: none;
 }
 
 .print-container {
