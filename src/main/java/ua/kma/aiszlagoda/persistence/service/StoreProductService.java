@@ -118,17 +118,17 @@ public class StoreProductService {
         }
         try {
             connection.setAutoCommit(false);
-            if (!storeProduct.isPromotionalProduct()) {
-                StoreProduct existingRegular = findByProductIdAndPromotional(storeProduct.getProductId(), false);
-                if (existingRegular != null) {
-                    int updatedQuantity = existingRegular.getProductsNumber() + storeProduct.getProductsNumber();
-                    updatePriceAndQuantity(existingRegular.getUpc(), storeProduct.getSellingPrice(), updatedQuantity);
-                    updatePromoPrice(existingRegular.getUpcProm(), storeProduct.getSellingPrice());
-                    existingRegular.setSellingPrice(storeProduct.getSellingPrice());
-                    existingRegular.setProductsNumber(updatedQuantity);
-                    connection.commit();
-                    return new Response<>(existingRegular, new LinkedList<>());
+            StoreProduct existingSameType = findByProductIdAndPromotional(storeProduct.getProductId(), storeProduct.isPromotionalProduct());
+            if (existingSameType != null) {
+                int updatedQuantity = existingSameType.getProductsNumber() + storeProduct.getProductsNumber();
+                updatePriceAndQuantity(existingSameType.getUpc(), storeProduct.getSellingPrice(), updatedQuantity);
+                if (!storeProduct.isPromotionalProduct()) {
+                    updatePromoPrice(existingSameType.getUpcProm(), storeProduct.getSellingPrice());
                 }
+                existingSameType.setSellingPrice(storeProduct.getSellingPrice());
+                existingSameType.setProductsNumber(updatedQuantity);
+                connection.commit();
+                return new Response<>(existingSameType, new LinkedList<>());
             }
             if (existsByProductIdAndPromotional(storeProduct.getProductId(), storeProduct.isPromotionalProduct(), null)) {
                 return new Response<>(null, Collections.singletonList("For this product, a store product of this type already exists"));
