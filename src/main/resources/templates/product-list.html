@@ -81,6 +81,14 @@
         </span>
     </div>
 
+    <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="errors-block">
+        <div th:each="err : ${errors}" th:text="${err}"></div>
+    </div>
+
+    <div th:if="${successMessage}" class="success-block">
+        <span th:text="${successMessage}"></span>
+    </div>
+
     <div th:if="${products != null and #lists.isEmpty(products)}" class="empty-state">
         <p>No products found.</p>
         <a th:href="@{/product/add}" class="btn btn-primary">Add product</a>
@@ -106,6 +114,7 @@
                 <td th:text="${product.characteristics}"></td>
                 <td th:text="${product.categoryNumber}"></td>
                 <td class="actions">
+                    <a th:href="@{/product/sold-quantity(productId=${product.productId})}" class="btn-sales">Sales</a>
                     <a th:href="@{/product/edit/{id}(id=${product.productId})}" class="btn-edit">Edit</a>
                     <form th:action="@{/product/delete/{id}(id=${product.productId})}" method="post"
                           class="inline-form">

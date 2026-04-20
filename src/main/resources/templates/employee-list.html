@@ -103,6 +103,15 @@
     </div>
 
     <div th:unless="${searchSurname != null}">
+
+        <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="errors-block">
+            <div th:each="err : ${errors}" th:text="${err}"></div>
+        </div>
+
+        <div th:if="${successMessage}" class="success-block">
+            <span th:text="${successMessage}"></span>
+        </div>
+
         <div th:if="${employees == null or #lists.isEmpty(employees)}" class="empty-state">
             <p>No employees found.</p>
             <a th:href="@{/employee/add}" class="btn btn-primary">Add employee</a>

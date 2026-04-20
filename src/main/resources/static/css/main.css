@@ -6,6 +6,8 @@
 
     --secondary-color-lighter: rgb(227, 243, 252);
     --secondary-color: rgba(174, 205, 221);
+    --secondary-color-dark: rgb(116, 187, 199);
+    --secondary-very-dark: rgb(61, 149, 166);
     --secondary-dark: #5b5f15;
     --secondary-light: #acae7f;
     --secondary-very-light: #dde0c3;
@@ -390,6 +392,23 @@ h2 {
     justify-content: center;
 }
 
+.btn-sales {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--secondary-color);
+    color: var(--secondary-very-dark);
+    text-decoration: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    transition: all 0.3s;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.btn-sales:hover {
+    background: var(--secondary-color-dark);
+}
+
 .btn-edit {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -460,6 +479,30 @@ h2 {
 
 .btn-secondary:hover {
     background: var(--secondary-dark);
+    color: var(--white);
+}
+
+.btn-filter {
+    background: var(--secondary-very-light);
+    color: var(--secondary-dark);
+    border: 1px solid var(--secondary-light);
+    font-family: inherit;
+}
+
+.btn-filter:hover {
+    background: var(--secondary-dark);
+    color: var(--white);
+}
+
+.btn-clear {
+    background: var(--primary-very-light);
+    color: var(--primary-dark);
+    border: 1px solid var(--primary-light);
+    font-family: inherit;
+}
+
+.btn-clear:hover {
+    background: var(--primary-dark);
     color: var(--white);
 }
 
@@ -892,6 +935,16 @@ h2 {
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
     color: var(--primary-dark);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.success-block {
+    background: var(--secondary-very-light);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    color: var(--secondary-dark);
     font-size: 1rem;
     text-align: center;
 }

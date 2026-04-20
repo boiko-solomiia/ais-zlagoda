@@ -2,9 +2,11 @@ package ua.kma.aiszlagoda.persistence.service;
 
 import org.springframework.stereotype.Service;
 import ua.kma.aiszlagoda.persistence.model.Product;
+import ua.kma.aiszlagoda.persistence.model.ProductSaleDTO;
 import ua.kma.aiszlagoda.persistence.model.Response;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,6 +153,12 @@ public class ProductService {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent product"));
         }
 
+        if (hasStoreProduct(productId)) {
+            return new Response<>(null, Collections.singletonList(
+                    "Cannot delete product because this product is in store"
+            ));
+        }
+
         String query = "DELETE FROM product WHERE product_id = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -198,4 +206,131 @@ public class ProductService {
         String query = "SELECT * FROM product WHERE product_name = ? ORDER BY product_name";
         return getListResponse(query, productName);
     }
+
+    public Response<Integer> getSoldQuantityByProductAndPeriod(Integer productId, LocalDateTime start, LocalDateTime end) {
+        String query = """
+            SELECT COALESCE(SUM(s.product_number), 0) AS total_quantity
+            FROM sale s
+            JOIN store_product sp ON s.upc = sp.upc
+            JOIN my_check c ON s.check_number = c.check_number
+            WHERE sp.product_id = ?
+              AND c.print_date BETWEEN ? AND ?
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+            statement.setTimestamp(2, Timestamp.valueOf(start));
+            statement.setTimestamp(3, Timestamp.valueOf(end));
+
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()) {
+                return new Response<>(rs.getInt("total_quantity"), new LinkedList<>());
+            }
+
+            return new Response<>(0, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<List<ProductSaleDTO>> findAllSalesByProduct(Integer productId) {
+        String query = """
+            SELECT s.check_number,
+                   c.print_date,
+                   s.upc,
+                   s.product_number,
+                   s.selling_price
+            FROM sale s
+            JOIN my_check c ON s.check_number = c.check_number
+            JOIN store_product sp ON s.upc = sp.upc
+            WHERE sp.product_id = ?
+            ORDER BY c.print_date DESC, s.check_number DESC
+            """;
+
+        List<ProductSaleDTO> sales = new LinkedList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                Timestamp ts = rs.getTimestamp("print_date");
+
+                ProductSaleDTO dto = new ProductSaleDTO(
+                        rs.getString("check_number"),
+                        ts != null ? ts.toLocalDateTime() : null,
+                        rs.getString("upc"),
+                        rs.getInt("product_number"),
+                        rs.getDouble("selling_price")
+                );
+
+                sales.add(dto);
+            }
+
+            return new Response<>(sales, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    public Response<List<ProductSaleDTO>> findSalesByProductAndPeriod(Integer productId,
+                                                                      LocalDateTime start,
+                                                                      LocalDateTime end) {
+        String query = """
+            SELECT s.check_number,
+                   c.print_date,
+                   s.upc,
+                   s.product_number,
+                   s.selling_price
+            FROM sale s
+            JOIN my_check c ON s.check_number = c.check_number
+            JOIN store_product sp ON s.upc = sp.upc
+            WHERE sp.product_id = ?
+              AND c.print_date BETWEEN ? AND ?
+            ORDER BY c.print_date DESC, s.check_number DESC
+            """;
+
+        List<ProductSaleDTO> sales = new LinkedList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+            statement.setTimestamp(2, Timestamp.valueOf(start));
+            statement.setTimestamp(3, Timestamp.valueOf(end));
+
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                Timestamp ts = rs.getTimestamp("print_date");
+
+                ProductSaleDTO dto = new ProductSaleDTO(
+                        rs.getString("check_number"),
+                        ts != null ? ts.toLocalDateTime() : null,
+                        rs.getString("upc"),
+                        rs.getInt("product_number"),
+                        rs.getDouble("selling_price")
+                );
+
+                sales.add(dto);
+            }
+
+            return new Response<>(sales, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private boolean hasStoreProduct(int productId) {
+        String query = "SELECT 1 FROM store_product WHERE product_id = ? LIMIT 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            return true;
+        }
+    }
+
 }

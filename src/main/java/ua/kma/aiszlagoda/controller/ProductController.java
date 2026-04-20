@@ -1,19 +1,21 @@
 package ua.kma.aiszlagoda.controller;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ua.kma.aiszlagoda.persistence.model.Category;
-import ua.kma.aiszlagoda.persistence.model.Product;
-import ua.kma.aiszlagoda.persistence.model.Response;
+import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.CategoryService;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
 @RequestMapping("/product")
 public class ProductController {
+
     private final ProductService productService;
     private final CategoryService categoryService;
 
@@ -91,14 +93,15 @@ public class ProductController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable int id, Model model) {
+    public String deleteProduct(@PathVariable int id, RedirectAttributes redirectAttributes) {
         Response<Product> response = productService.deleteProduct(id);
 
         if (!response.getErrors().isEmpty()) {
-            model.addAttribute("errors", response.getErrors());
-            return "error-page";
+            redirectAttributes.addFlashAttribute("errors", response.getErrors());
+            return "redirect:/product";
         }
 
+        redirectAttributes.addFlashAttribute("successMessage", "Product deleted successfully");
         return "redirect:/product";
     }
 
@@ -135,4 +138,81 @@ public class ProductController {
         model.addAttribute("selectedCategory", categoryNumber);
         return "product-list";
     }
+
+    @GetMapping("/print")
+    public String printProducts(Model model) {
+        Response<List<Product>> response = productService.findAll();
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+        model.addAttribute("products", response.getObject());
+        return "product-print";
+    }
+
+
+    @GetMapping("/sold-quantity")
+    public String showProductSalesPage(@RequestParam Integer productId, Model model) {
+        Response<Product> productResponse = productService.findProductById(productId);
+        if (!productResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", productResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<List<ProductSaleDTO>> salesResponse = productService.findAllSalesByProduct(productId);
+        if (!salesResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", salesResponse.getErrors());
+            return "error-page";
+        }
+
+        int soldQuantity = 0;
+        for (ProductSaleDTO sale : salesResponse.getObject()) {
+            soldQuantity += sale.getProductNumber();
+        }
+
+        model.addAttribute("product", productResponse.getObject());
+        model.addAttribute("sales", salesResponse.getObject());
+        model.addAttribute("soldQuantity", soldQuantity);
+
+        return "product-sold-quantity";
+    }
+
+    @PostMapping("/sold-quantity")
+    public String filterProductSalesByPeriod(
+            @RequestParam Integer productId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime start,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime end,
+            Model model) {
+
+        Response<Product> productResponse = productService.findProductById(productId);
+        if (!productResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", productResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<List<ProductSaleDTO>> salesResponse =
+                productService.findSalesByProductAndPeriod(productId, start, end);
+
+        if (!salesResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", salesResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<Integer> quantityResponse =
+                productService.getSoldQuantityByProductAndPeriod(productId, start, end);
+
+        if (!quantityResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", quantityResponse.getErrors());
+            return "error-page";
+        }
+
+        model.addAttribute("product", productResponse.getObject());
+        model.addAttribute("sales", salesResponse.getObject());
+        model.addAttribute("soldQuantity", quantityResponse.getObject());
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+
+        return "product-sold-quantity";
+    }
+
 }

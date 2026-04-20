@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Product Sales</title>
+</head>
+<body class="products-page">
+
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product" class="active">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
+
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>
+            Sales for
+            <span th:text="${product.productName}"></span>
+        </h1>
+    </div>
+
+    <div class="action-bar">
+        <form th:action="@{/product/sold-quantity}" method="post" class="filter-form">
+            <div class="filters">
+                <input type="hidden" name="productId" th:value="${product.productId}">
+
+                <div class="date-range">
+                    <label>
+                        <input type="datetime-local"
+                               name="start"
+                               class="search-input date-input"
+                               required
+                               th:value="${start != null ? #temporals.format(start, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                    </label>
+
+                    <span class="date-sep">—</span>
+
+                    <label>
+                        <input type="datetime-local"
+                               name="end"
+                               class="search-input date-input"
+                               required
+                               th:value="${end != null ? #temporals.format(end, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-filter">Filter</button>
+                <a th:href="@{/product/sold-quantity(productId=${product.productId})}" class="btn btn-clear">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="sum-bar">
+        <span class="sum-label">Total sold quantity:</span>
+        <span class="sum-value" th:text="${soldQuantity}"></span>
+    </div>
+
+    <div th:if="${#lists.isEmpty(sales)}" class="empty-state">
+        <p>No sales found for this product in the selected period.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(sales)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>UPC</th>
+                <th>Quantity</th>
+                <th>Price per unit</th>
+                <th>Subtotal</th>
+                <th>Check number</th>
+                <th>Check time</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sale : ${sales}">
+                <td th:text="${sale.upc}"></td>
+                <td th:text="${sale.productNumber}"></td>
+                <td th:text="${#numbers.formatDecimal(sale.sellingPrice, 1, 2) + ' грн'}"></td>
+                <td th:text="${#numbers.formatDecimal(sale.productNumber * sale.sellingPrice, 1, 2) + ' грн'}"></td>
+                <td th:text="${sale.checkNumber}"></td>
+                <td th:text="${#temporals.format(sale.printDate, 'dd.MM.yyyy HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+        <a th:href="@{/product}" class="btn btn-primary">Back to products</a>
+    </div>
+
+</div>
+
+</body>
+</html>
