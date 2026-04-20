@@ -87,6 +87,11 @@ public class CategoryService {
         if (findCategoryById(categoryNumber).getObject() == null) {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent category"));
         }
+        if (hasProducts(categoryNumber)) {
+            return new Response<>(null, Collections.singletonList(
+                    "Cannot delete category because this category has products"
+            ));
+        }
         String query = "DELETE FROM category WHERE category_number = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, categoryNumber);
@@ -140,6 +145,18 @@ public class CategoryService {
             }
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private boolean hasProducts(int categoryNumber) {
+        String query = "SELECT 1 FROM product WHERE category_number = ? LIMIT 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, categoryNumber);
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            return true;
         }
     }
 }

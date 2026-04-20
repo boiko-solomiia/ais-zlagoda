@@ -4,8 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ua.kma.aiszlagoda.persistence.model.CustomerCard;
+import ua.kma.aiszlagoda.persistence.model.Employee;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.service.CustomerCardService;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -78,14 +80,15 @@ public class CustomerCardController {
     }
 
     @PostMapping("/delete/{cardNumber}")
-    public String deleteCustomerCard(@PathVariable String cardNumber, Model model) {
+    public String deleteCustomerCard(@PathVariable String cardNumber, RedirectAttributes redirectAttributes) {
         Response<CustomerCard> response = customerCardService.deleteCustomerCard(cardNumber);
 
         if (!response.getErrors().isEmpty()) {
-            model.addAttribute("errors", response.getErrors());
-            return "error-page";
+            redirectAttributes.addFlashAttribute("errors", response.getErrors());
+            return "redirect:/customer-card";
         }
 
+        redirectAttributes.addFlashAttribute("successMessage", "Customer card deleted successfully");
         return "redirect:/customer-card";
     }
 

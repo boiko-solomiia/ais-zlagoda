@@ -4,12 +4,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ua.kma.aiszlagoda.persistence.model.Category;
-import ua.kma.aiszlagoda.persistence.model.Product;
-import ua.kma.aiszlagoda.persistence.model.ProductSaleDTO;
-import ua.kma.aiszlagoda.persistence.model.Response;
+import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.CategoryService;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -95,14 +93,15 @@ public class ProductController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable int id, Model model) {
+    public String deleteProduct(@PathVariable int id, RedirectAttributes redirectAttributes) {
         Response<Product> response = productService.deleteProduct(id);
 
         if (!response.getErrors().isEmpty()) {
-            model.addAttribute("errors", response.getErrors());
-            return "error-page";
+            redirectAttributes.addFlashAttribute("errors", response.getErrors());
+            return "redirect:/product";
         }
 
+        redirectAttributes.addFlashAttribute("successMessage", "Product deleted successfully");
         return "redirect:/product";
     }
 

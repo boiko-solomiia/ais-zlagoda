@@ -59,6 +59,14 @@
         </span>
     </div>
 
+    <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="errors-block">
+        <div th:each="err : ${errors}" th:text="${err}"></div>
+    </div>
+
+    <div th:if="${successMessage}" class="success-block">
+        <span th:text="${successMessage}"></span>
+    </div>
+
     <div th:if="${categories == null or #lists.isEmpty(categories)}" class="empty-state">
         <p>No categories found.</p>
         <a th:href="@{/category/add}" class="btn btn-primary">Add category</a>

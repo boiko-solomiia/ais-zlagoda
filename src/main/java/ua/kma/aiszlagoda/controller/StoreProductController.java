@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
 import ua.kma.aiszlagoda.persistence.service.StoreProductService;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -91,14 +92,15 @@ public class StoreProductController {
     }
 
     @PostMapping("/delete/{upc}")
-    public String deleteStoreProduct(@PathVariable String upc, Model model) {
+    public String deleteStoreProduct(@PathVariable String upc, RedirectAttributes redirectAttributes) {
         Response<StoreProduct> response = storeProductService.deleteStoreProduct(upc);
 
         if (!response.getErrors().isEmpty()) {
-            model.addAttribute("errors", response.getErrors());
-            return "error-page";
+            redirectAttributes.addFlashAttribute("errors", response.getErrors());
+            return "redirect:/store-product";
         }
 
+        redirectAttributes.addFlashAttribute("successMessage", "Store product deleted successfully");
         return "redirect:/store-product";
     }
 

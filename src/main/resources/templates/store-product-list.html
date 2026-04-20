@@ -78,6 +78,14 @@
         Results for: <strong th:text="${upc}"></strong>
     </div>
 
+    <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="errors-block">
+        <div th:each="err : ${errors}" th:text="${err}"></div>
+    </div>
+
+    <div th:if="${successMessage}" class="success-block">
+        <span th:text="${successMessage}"></span>
+    </div>
+
     <div th:if="${storeProducts == null or #lists.isEmpty(storeProducts)}" class="empty-state">
         <p>No store products found.</p>
         <a th:href="@{/store-product/add}" class="btn btn-primary">Add store product</a>

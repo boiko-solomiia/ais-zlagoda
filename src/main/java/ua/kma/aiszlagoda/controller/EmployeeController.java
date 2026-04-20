@@ -7,6 +7,7 @@ import ua.kma.aiszlagoda.persistence.model.Employee;
 import ua.kma.aiszlagoda.persistence.model.EmployeeInfo;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.service.EmployeeService;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -79,14 +80,15 @@ public class EmployeeController {
     }
 
     @PostMapping("/delete/{idEmployee}")
-    public String deleteEmployee(@PathVariable String idEmployee, Model model) {
+    public String deleteEmployee(@PathVariable String idEmployee, RedirectAttributes redirectAttributes) {
         Response<Employee> response = employeeService.deleteEmployee(idEmployee);
 
         if (!response.getErrors().isEmpty()) {
-            model.addAttribute("errors", response.getErrors());
-            return "error-page";
+            redirectAttributes.addFlashAttribute("errors", response.getErrors());
+            return "redirect:/employee";
         }
 
+        redirectAttributes.addFlashAttribute("successMessage", "Employee deleted successfully");
         return "redirect:/employee";
     }
 

@@ -140,6 +140,12 @@ public class CustomerCardService {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent customer card"));
         }
 
+        if (hasChecks(cardNumber)) {
+            return new Response<>(null, Collections.singletonList(
+                    "Cannot delete customer card because this customer has checks"
+            ));
+        }
+
         String query = "DELETE FROM customer_card WHERE card_number = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -223,6 +229,18 @@ public class CustomerCardService {
             return new Response<>(customerCards, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private boolean hasChecks(String cardNumber) {
+        String query = "SELECT 1 FROM my_check WHERE card_number = ? LIMIT 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, cardNumber);
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            return true;
         }
     }
 }

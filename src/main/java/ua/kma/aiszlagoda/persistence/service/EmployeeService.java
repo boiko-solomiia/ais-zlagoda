@@ -200,6 +200,12 @@ public class EmployeeService {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent employee"));
         }
 
+        if (hasChecks(employeeId)) {
+            return new Response<>(null, Collections.singletonList(
+                    "Cannot delete employee because this employee has created checks"
+            ));
+        }
+
         String query = "DELETE FROM employee WHERE id_employee = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -287,6 +293,18 @@ public class EmployeeService {
             return new Response<>(null, java.util.Collections.singletonList("Employee not found"));
         } catch (SQLException e) {
             return new Response<>(null, java.util.Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private boolean hasChecks(String employeeId) {
+        String query = "SELECT 1 FROM my_check WHERE id_employee = ? LIMIT 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, employeeId);
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            return true;
         }
     }
 }

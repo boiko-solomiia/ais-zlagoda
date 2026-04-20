@@ -939,6 +939,16 @@ h2 {
     text-align: center;
 }
 
+.success-block {
+    background: var(--secondary-very-light);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    color: var(--secondary-dark);
+    font-size: 1rem;
+    text-align: center;
+}
+
 .form-actions {
     display: flex;
     justify-content: flex-end;

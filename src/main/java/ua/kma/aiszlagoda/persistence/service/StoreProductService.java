@@ -255,6 +255,22 @@ public class StoreProductService {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent store product"));
         }
         StoreProduct product = exist.getObject();
+
+        if (hasSales(product.getUpc())) {
+            return new Response<>(null, Collections.singletonList(
+                    "Cannot delete store product because it has sales"
+            ));
+        }
+
+        if (!product.isPromotionalProduct() &&
+            product.getUpcProm() != null &&
+            !product.getUpcProm().isBlank() &&
+            hasSales(product.getUpcProm())) {
+            return new Response<>(null, Collections.singletonList(
+                    "Cannot delete store product because its promotional product has sales"
+            ));
+        }
+
         try {
             connection.setAutoCommit(false);
             if (!product.isPromotionalProduct() &&
@@ -650,6 +666,18 @@ public class StoreProductService {
             if (rows == 0) {
                 throw new SQLException("Failed to update promotional store product during restock");
             }
+        }
+    }
+
+    private boolean hasSales(String upc) {
+        String query = "SELECT 1 FROM sale WHERE upc = ? LIMIT 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, upc);
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            return true;
         }
     }
 }

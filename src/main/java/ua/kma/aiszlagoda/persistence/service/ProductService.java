@@ -153,6 +153,12 @@ public class ProductService {
             return new Response<>(null, Collections.singletonList("Can't delete nonexistent product"));
         }
 
+        if (hasStoreProduct(productId)) {
+            return new Response<>(null, Collections.singletonList(
+                    "Cannot delete product because this product is in store"
+            ));
+        }
+
         String query = "DELETE FROM product WHERE product_id = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -312,6 +318,18 @@ public class ProductService {
             return new Response<>(sales, new LinkedList<>());
         } catch (SQLException e) {
             return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
+    private boolean hasStoreProduct(int productId) {
+        String query = "SELECT 1 FROM store_product WHERE product_id = ? LIMIT 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+            ResultSet rs = statement.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            return true;
         }
     }
 

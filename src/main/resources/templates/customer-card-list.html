@@ -77,6 +77,14 @@
         </span>
     </div>
 
+    <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="errors-block">
+        <div th:each="err : ${errors}" th:text="${err}"></div>
+    </div>
+
+    <div th:if="${successMessage}" class="success-block">
+        <span th:text="${successMessage}"></span>
+    </div>
+
     <div th:if="${customerCards == null or #lists.isEmpty(customerCards)}" class="empty-state">
         <p>No customer cards found.</p>
         <a th:href="@{/customer-card/add}" class="btn btn-primary">Add customer card</a>
