@@ -37,6 +37,7 @@ public class CheckController {
 
     @GetMapping
     public String getAllChecks(Model model) {
+        checkService.deleteChecksOlderThanThreeYears();
         Response<List<CheckDTO>> response = checkService.findAllDTO();
         if (!response.getErrors().isEmpty()) {
             model.addAttribute("errors", response.getErrors());

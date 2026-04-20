@@ -328,4 +328,14 @@ public class CheckService {
             return 0.0;
         }
     }
+    public void deleteChecksOlderThanThreeYears() {
+        String query = "DELETE FROM my_check WHERE print_date < ?";
+        LocalDateTime borderDate = LocalDateTime.now().minusYears(3);
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setTimestamp(1, Timestamp.valueOf(borderDate));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete old checks", e);
+        }
+    }
 }
