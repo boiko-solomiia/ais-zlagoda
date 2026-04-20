@@ -1,14 +1,17 @@
 package ua.kma.aiszlagoda.controller;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ua.kma.aiszlagoda.persistence.model.Category;
 import ua.kma.aiszlagoda.persistence.model.Product;
+import ua.kma.aiszlagoda.persistence.model.ProductSaleDTO;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.service.CategoryService;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -147,4 +150,70 @@ public class ProductController {
         model.addAttribute("products", response.getObject());
         return "product-print";
     }
+
+
+    @GetMapping("/sold-quantity")
+    public String showProductSalesPage(@RequestParam Integer productId, Model model) {
+        Response<Product> productResponse = productService.findProductById(productId);
+        if (!productResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", productResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<List<ProductSaleDTO>> salesResponse = productService.findAllSalesByProduct(productId);
+        if (!salesResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", salesResponse.getErrors());
+            return "error-page";
+        }
+
+        int soldQuantity = 0;
+        for (ProductSaleDTO sale : salesResponse.getObject()) {
+            soldQuantity += sale.getProductNumber();
+        }
+
+        model.addAttribute("product", productResponse.getObject());
+        model.addAttribute("sales", salesResponse.getObject());
+        model.addAttribute("soldQuantity", soldQuantity);
+
+        return "product-sold-quantity";
+    }
+
+    @PostMapping("/sold-quantity")
+    public String filterProductSalesByPeriod(
+            @RequestParam Integer productId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime start,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime end,
+            Model model) {
+
+        Response<Product> productResponse = productService.findProductById(productId);
+        if (!productResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", productResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<List<ProductSaleDTO>> salesResponse =
+                productService.findSalesByProductAndPeriod(productId, start, end);
+
+        if (!salesResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", salesResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<Integer> quantityResponse =
+                productService.getSoldQuantityByProductAndPeriod(productId, start, end);
+
+        if (!quantityResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", quantityResponse.getErrors());
+            return "error-page";
+        }
+
+        model.addAttribute("product", productResponse.getObject());
+        model.addAttribute("sales", salesResponse.getObject());
+        model.addAttribute("soldQuantity", quantityResponse.getObject());
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+
+        return "product-sold-quantity";
+    }
+
 }

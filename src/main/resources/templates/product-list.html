@@ -106,6 +106,7 @@
                 <td th:text="${product.characteristics}"></td>
                 <td th:text="${product.categoryNumber}"></td>
                 <td class="actions">
+                    <a th:href="@{/product/sold-quantity(productId=${product.productId})}" class="btn-sales">Sales</a>
                     <a th:href="@{/product/edit/{id}(id=${product.productId})}" class="btn-edit">Edit</a>
                     <form th:action="@{/product/delete/{id}(id=${product.productId})}" method="post"
                           class="inline-form">
