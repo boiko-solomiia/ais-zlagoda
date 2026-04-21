@@ -38,6 +38,15 @@
 
     <div class="action-bar">
         <div class="filters">
+            <div class="filter-group">
+                <a th:href="@{/category}"
+                   th:classappend="${filterType == null} ? ' active' : ''"
+                   class="filter-btn">All Categories</a>
+                <a th:href="@{/category/fully-sold}"
+                   th:classappend="${filterType == 'fully-sold'} ? ' active' : ''"
+                   class="filter-btn">Fully Sold</a>
+            </div>
+
             <form th:action="@{/category/search}" method="get" class="search-form">
                 <label>
                     <input type="text" name="name" th:value="${searchName}"
@@ -55,6 +64,10 @@
     </div>
 
     <div class="active-filters">
+        <span th:if="${filterType == 'fully-sold'}" class="filter-badge">
+            Showing categories where ALL products have been sold at least once
+            <a th:href="@{/category}" class="remove-filter">х</a>
+        </span>
         <span th:if="${searchName}" class="filter-badge">
             Search: <b th:text="${searchName}"></b>
             <a th:href="@{/category}" class="remove-filter">х</a>
@@ -79,6 +92,7 @@
             <span class="category-name" th:text="${cat.categoryName}"></span>
             <small class="category-number" th:text="${cat.categoryNumber}"></small>
             <div class="category-actions">
+                <a th:href="@{/category/stats/{id}(id=${cat.categoryNumber})}" class="btn-sales">Stats</a>
                 <a th:href="@{/category/edit/{id}(id=${cat.categoryNumber})}" class="btn-edit">Edit</a>
                 <form th:action="@{/category/delete/{id}(id=${cat.categoryNumber})}" method="post" class="inline-form">
                     <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>

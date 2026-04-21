@@ -1238,8 +1238,43 @@ h2 {
     margin-top: 1rem;
     border-radius: var(--border-radius-md);
 }
+
 .discount-info p {
     margin: 0.25rem 0;
+}
+
+#discount-line {
+    margin-top: 0.5rem;
+    text-align: right;
+    font-weight: bold;
+    color: var(--primary-dark);
+    display: none;
+}
+
+.stats-summary {
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--primary-very-light);
+    border-radius: var(--border-radius-md);
+    border-left: 4px solid var(--primary-light);
+}
+.stats-summary p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+.stats-summary p:first-child {
+    margin-top: 0;
+}
+.stats-summary p:last-child {
+    margin-bottom: 0;
+}
+.stats-summary strong {
+    color: var(--primary-light);
+    font-weight: 600;
+}
+.stats-summary span {
+    color: var(--primary-dark);
+    font-weight: 600;
 }
 
 .print-container {

@@ -7,9 +7,7 @@ import ua.kma.aiszlagoda.persistence.model.SaleRequest;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SaleService {
@@ -174,11 +172,11 @@ public class SaleService {
 
     public double productNumberTotalByPeriod(String upc, LocalDateTime start, LocalDateTime end) {
         String query = """
-            SELECT COALESCE(SUM(product_number), 0) AS total
-            FROM my_check
-            INNER JOIN sale ON my_check.check_number = sale.check_number
-            WHERE upc = ? AND print_date BETWEEN ? AND ?
-            """;
+                SELECT COALESCE(SUM(product_number), 0) AS total
+                FROM my_check
+                INNER JOIN sale ON my_check.check_number = sale.check_number
+                WHERE upc = ? AND print_date BETWEEN ? AND ?
+                """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, upc);
@@ -244,5 +242,42 @@ public class SaleService {
             total += item.getProductNumber() * priceResponse.getObject();
         }
         return new Response<>(total, new LinkedList<>());
+    }
+
+    public Response<List<Map<String, Object>>> getSalesStatsByManufacturerForCategory(int categoryNumber) {
+        List<Map<String, Object>> result = new LinkedList<>();
+        String query = """
+                SELECT
+                    p.manufacturer,
+                    COUNT(DISTINCT s.check_number) AS checksCount,
+                    COALESCE(SUM(s.product_number), 0) AS totalUnitsSold,
+                    COALESCE(SUM(s.product_number * s.selling_price), 0) AS totalSales,
+                    COALESCE(ROUND(AVG(s.selling_price), 2), 0) AS avgPrice,
+                    COALESCE(ROUND(SUM(s.product_number * s.selling_price) / NULLIF(SUM(s.product_number), 0), 2), 0) AS weightedAvgPrice
+                FROM sale s
+                JOIN store_product sp ON s.upc = sp.upc
+                JOIN product p ON sp.product_id = p.product_id
+                WHERE p.category_number = ?
+                GROUP BY p.manufacturer
+                ORDER BY totalUnitsSold DESC
+                """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, categoryNumber);
+            ResultSet resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("manufacturer", resultSet.getString("manufacturer"));
+                row.put("checksCount", resultSet.getInt("checksCount"));
+                row.put("totalUnitsSold", resultSet.getInt("totalUnitsSold"));
+                row.put("totalSales", resultSet.getDouble("totalSales"));
+                row.put("avgPrice", resultSet.getDouble("avgPrice"));
+                row.put("weightedAvgPrice", resultSet.getDouble("weightedAvgPrice"));
+                result.add(row);
+            }
+            return new Response<>(result, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
     }
 }
