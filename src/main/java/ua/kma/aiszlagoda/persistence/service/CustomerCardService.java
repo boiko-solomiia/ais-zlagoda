@@ -5,6 +5,7 @@ import ua.kma.aiszlagoda.persistence.model.CustomerCard;
 import ua.kma.aiszlagoda.persistence.model.Response;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -241,6 +242,80 @@ public class CustomerCardService {
             return rs.next();
         } catch (SQLException e) {
             return true;
+        }
+    }
+
+    public Response<List<CustomerCard>> findCustomersBoughtAllProductsFromCategory(String categoryName, LocalDateTime start, LocalDateTime end) {
+        String query = """
+                SELECT DISTINCT cc.*
+                    FROM customer_card cc
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM product p
+                        JOIN category c
+                            ON c.category_number = p.category_number
+                        JOIN store_product sp0
+                            ON sp0.product_id = p.product_id
+                        JOIN sale s0
+                            ON s0.upc = sp0.upc
+                        JOIN my_check ch0
+                            ON ch0.check_number = s0.check_number
+                        WHERE c.category_name = ?
+                          AND ch0.print_date >= ? AND ch0.print_date < ?
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM product p
+                        JOIN category c
+                            ON c.category_number = p.category_number
+                        WHERE c.category_name = ?
+                          AND EXISTS (
+                              SELECT 1
+                              FROM store_product sp0
+                              JOIN sale s0
+                                  ON s0.upc = sp0.upc
+                              JOIN my_check ch0
+                                  ON ch0.check_number = s0.check_number
+                              WHERE sp0.product_id = p.product_id
+                                AND ch0.print_date >= ? AND ch0.print_date < ?
+                          )
+                          AND NOT EXISTS (
+                              SELECT 1
+                              FROM my_check ch
+                              JOIN sale s
+                                  ON s.check_number = ch.check_number
+                              JOIN store_product sp
+                                  ON sp.upc = s.upc
+                              WHERE ch.card_number = cc.card_number
+                                AND sp.product_id = p.product_id
+                                AND ch.print_date >= ? AND ch.print_date < ?
+                          )
+                    )
+                    ORDER BY cc.cust_surname, cc.cust_name;
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, categoryName);
+            statement.setTimestamp(2, Timestamp.valueOf(start));
+            statement.setTimestamp(3, Timestamp.valueOf(end));
+
+            statement.setString(4, categoryName);
+            statement.setTimestamp(5, Timestamp.valueOf(start));
+            statement.setTimestamp(6, Timestamp.valueOf(end));
+
+            statement.setTimestamp(7, Timestamp.valueOf(start));
+            statement.setTimestamp(8, Timestamp.valueOf(end));
+
+            ResultSet resultSet = statement.executeQuery();
+            List<CustomerCard> customerCards = new LinkedList<>();
+
+            while (resultSet.next()) {
+                customerCards.add(customerCardFromResultSet(resultSet));
+            }
+
+            return new Response<>(customerCards, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
         }
     }
 }

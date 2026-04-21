@@ -8,6 +8,9 @@ import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.service.CustomerCardService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.access.prepost.PreAuthorize;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
 
 import java.util.List;
 
@@ -140,5 +143,45 @@ public class CustomerCardController {
         }
         model.addAttribute("customerCards", response.getObject());
         return "customer-card-print";
+    }
+
+    @GetMapping("/bought-all-products")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
+    public String findCustomersBoughtAllProductsFromCategory(
+            @RequestParam String categoryName,
+            @RequestParam String start,
+            @RequestParam String end,
+            Model model
+    ) {
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        try {
+            startDate = LocalDateTime.parse(start);
+            endDate = LocalDateTime.parse(end);
+        } catch (DateTimeParseException e) {
+            model.addAttribute("errors", Collections.singletonList("Invalid date format"));
+            model.addAttribute("customerCards", Collections.emptyList());
+            model.addAttribute("searchCategoryName", categoryName);
+            model.addAttribute("searchStart", start);
+            model.addAttribute("searchEnd", end);
+            return "customer-card-list";
+        }
+
+        Response<List<CustomerCard>> response =
+                customerCardService.findCustomersBoughtAllProductsFromCategory(categoryName, startDate, endDate);
+
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            model.addAttribute("customerCards", Collections.emptyList());
+        } else {
+            model.addAttribute("customerCards", response.getObject());
+        }
+
+        model.addAttribute("searchCategoryName", categoryName);
+        model.addAttribute("searchStart", start);
+        model.addAttribute("searchEnd", end);
+
+        return "customer-card-list";
     }
 }

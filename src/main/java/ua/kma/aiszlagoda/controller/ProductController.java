@@ -228,4 +228,17 @@ public class ProductController {
         return "product-sold-quantity";
     }
 
+    @GetMapping("/customer-stats")
+    @PreAuthorize("hasRole('MANAGER')")
+    public String showProductsCustomerStatsPage(Model model) {
+        Response<List<ProductCustomerStatsDTO>> response = productService.findProductsBoughtByMostDifferentCustomers();
+
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "product-customer-stats";
+        }
+
+        model.addAttribute("productsStats", response.getObject());
+        return "product-customer-stats";
+    }
 }

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Products Customer Stats</title>
+</head>
+<body class="products-page">
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product" class="active">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/category">Categories</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
+
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>Products Bought by Most Different Customers</h1>
+    </div>
+
+    <div class="action-bar">
+        <div></div>
+        <div class="action-right">
+            <a th:href="@{/product}" class="btn btn-sort">Back to Products</a>
+        </div>
+    </div>
+
+    <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="errors-block">
+        <div th:each="err : ${errors}" th:text="${err}"></div>
+    </div>
+
+    <div th:if="${productsStats != null and #lists.isEmpty(productsStats)}" class="empty-state">
+        <p>No statistics found.</p>
+    </div>
+
+    <div th:unless="${productsStats == null or #lists.isEmpty(productsStats)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Manufacturer</th>
+                <th>Different Customers</th>
+                <th>Total Units Sold</th>
+                <th>Total Sales Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="stat : ${productsStats}">
+                <td th:text="${stat.productId}"></td>
+                <td th:text="${stat.productName}"></td>
+                <td th:text="${stat.manufacturer}"></td>
+                <td th:text="${stat.differentCustomersCount}"></td>
+                <td th:text="${stat.totalUnitsSold}"></td>
+                <td th:text="${#numbers.formatDecimal(stat.totalSalesAmount, 1, 2)}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

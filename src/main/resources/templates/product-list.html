@@ -67,6 +67,7 @@
 
         <div class="action-right">
             <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/add}" class="btn btn-primary">Add product</a>
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/customer-stats}" class="btn btn-sort">Customer Stats</a>
             <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/print}" class="btn btn-sort">Print Report</a>
         </div>
     </div>

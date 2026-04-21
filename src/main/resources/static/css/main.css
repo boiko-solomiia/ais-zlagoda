@@ -588,6 +588,19 @@ h2 {
     color: var(--primary-dark);
 }
 
+.full-width-search {
+    width: 100%;
+}
+
+.full-width-search .search-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.search-info-compact {
+    margin-bottom: 0.25rem;
+}
 .action-bar {
     display: flex;
     justify-content: space-between;

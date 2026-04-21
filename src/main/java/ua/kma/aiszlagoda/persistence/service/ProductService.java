@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ua.kma.aiszlagoda.persistence.model.Product;
 import ua.kma.aiszlagoda.persistence.model.ProductSaleDTO;
 import ua.kma.aiszlagoda.persistence.model.Response;
+import ua.kma.aiszlagoda.persistence.model.ProductCustomerStatsDTO;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -332,5 +333,55 @@ public class ProductService {
             return true;
         }
     }
+
+    public Response<List<ProductCustomerStatsDTO>> findProductsBoughtByMostDifferentCustomers() {
+        String query = """
+            SELECT
+                p.product_id,
+                p.product_name,
+                p.manufacturer,
+                COUNT(DISTINCT cc.card_number) AS different_customers_count,
+                SUM(s.product_number) AS total_units_sold,
+                SUM(s.product_number * s.selling_price) AS total_sales_amount
+            FROM product p
+            JOIN store_product sp
+                ON sp.product_id = p.product_id
+            JOIN sale s
+                ON s.upc = sp.upc
+            JOIN my_check ch
+                ON ch.check_number = s.check_number
+            JOIN customer_card cc
+                ON cc.card_number = ch.card_number
+            GROUP BY p.product_id, p.product_name, p.manufacturer
+            ORDER BY different_customers_count DESC,
+                     total_units_sold DESC,
+                     total_sales_amount DESC
+            """;
+
+        List<ProductCustomerStatsDTO> stats = new LinkedList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                ProductCustomerStatsDTO dto = new ProductCustomerStatsDTO(
+                        rs.getInt("product_id"),
+                        rs.getString("product_name"),
+                        rs.getString("manufacturer"),
+                        rs.getInt("different_customers_count"),
+                        rs.getInt("total_units_sold"),
+                        rs.getDouble("total_sales_amount")
+                );
+
+                stats.add(dto);
+            }
+
+            return new Response<>(stats, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
+
 
 }

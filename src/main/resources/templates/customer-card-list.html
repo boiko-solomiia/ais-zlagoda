@@ -61,7 +61,40 @@
             </form>
 
         </div>
+        <div class="search-info search-info-compact">
+            Find regular customers who, during a selected period, bought all products from a chosen category that were sold in that period:
+        </div>
+        <div class="full-width-search">
+            <form th:action="@{/customer-card/bought-all-products}" method="get" class="search-form">
+                <label>
+                    <input type="text"
+                           name="categoryName"
+                           placeholder="Category name"
+                           class="search-input"
+                           th:value="${searchCategoryName}">
+                </label>
 
+                <label>
+                    <input type="datetime-local"
+                           name="start"
+                           class="search-input"
+                           th:value="${searchStart}">
+                </label>
+
+                <label>
+                    <input type="datetime-local"
+                           name="end"
+                           class="search-input"
+                           th:value="${searchEnd}">
+                </label>
+
+                <button type="submit" class="btn btn-secondary">Find customers</button>
+
+                <a th:if="${searchCategoryName != null or searchStart != null or searchEnd != null}"
+                   th:href="@{/customer-card}"
+                   class="btn btn-sort">Clear</a>
+            </form>
+        </div>
         <div class="action-right">
             <a sec:authorize="hasAnyRole('MANAGER', 'CASHIER')"
                th:href="@{/customer-card/add}"
@@ -81,6 +114,15 @@
             Discount: <b th:text="${selectedPercent} + '%'"></b>
             <a th:href="@{/customer-card}" class="remove-filter">×</a>
         </span>
+        <span th:if="${searchCategoryName != null or searchStart != null or searchEnd != null}" class="filter-badge">
+    Bought all products from category:
+    <b th:text="${searchCategoryName}"></b>
+    <span th:if="${searchStart != null and searchEnd != null}">
+        (<span th:text="${searchStart}"></span> -
+        <span th:text="${searchEnd}"></span>)
+    </span>
+    <a th:href="@{/customer-card}" class="remove-filter">×</a>
+  </span>
     </div>
 
     <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="errors-block">
