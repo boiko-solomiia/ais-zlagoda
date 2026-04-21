@@ -121,6 +121,7 @@ h2 {
     border: 1px solid var(--secondary-light);
     border-radius: 0.375rem;
     font-size: 1rem;
+    font-family: inherit;
 }
 
 .login-form-input:focus {
@@ -394,9 +395,9 @@ h2 {
 .btn-sales {
     display: inline-block;
     padding: 0.25rem 0.75rem;
-    background: var(--secondary-color);
+    background: var(--secondary-color-lighter);
     color: var(--secondary-very-dark);
-    border: 1px solid var(--secondary-color-dark);
+    border: 1px solid var(--secondary-color);
     text-decoration: none;
     border-radius: var(--border-radius-sm);
     font-size: 1rem;
