@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Category Stats</title>
+</head>
+<body class="categories-page">
+
+<div class="navigation-bar">
+    <div class="navigation-links">
+        <a href="/">Home</a>
+        <a href="/product">Products</a>
+        <a href="/store-product">Store Products</a>
+        <a href="/category" class="active">Categories</a>
+        <a href="/employee">Employees</a>
+        <a href="/customer-card">Customer Cards</a>
+        <a href="/check">Checks</a>
+    </div>
+    <div class="account-menu">
+        <button class="account-btn">👤</button>
+        <div class="dropdown-menu">
+            <a href="/profile">My Profile</a>
+            <form th:action="@{/logout}" method="post">
+                <button class="logout-btn" type="submit">Log Out</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>Sales Statistics: <span th:text="${category.categoryName}"></span></h1>
+        <p>Category #<span th:text="${category.categoryNumber}"></span></p>
+    </div>
+
+    <div class="action-bar">
+        <a th:href="@{/category}" class="btn btn-sort">← Back to Categories</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(stats)}" class="empty-state">
+        <p>No sales data available for this category.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(stats)}" class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Manufacturer</th>
+                <th>Total Units Sold</th>
+                <th>Total Sales (UAH)</th>
+                <th>Average Price (UAH)</th>
+                <th>Weighted Average Price</th>
+                <th>Number of Checks</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="stat : ${stats}">
+                <td th:text="${stat.manufacturer}"></td>
+                <td th:text="${stat.totalUnitsSold}"></td>
+                <td th:text="${#numbers.formatDecimal(stat.totalSales, 1, 2) + ' грн'}"></td>
+                <td th:text="${#numbers.formatDecimal(stat.avgPrice, 1, 2) + ' грн'}"></td>
+                <td th:text="${#numbers.formatDecimal(stat.weightedAvgPrice, 1, 2) + ' грн'}"></td>
+                <td th:text="${stat.checksCount}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="stats-summary">
+            <p><strong>Total manufacturers:</strong> <span th:text="${totalManufacturers}"></span></p>
+            <p><strong>Total units sold (all manufacturers):</strong> <span th:text="${totalUnits}"></span></p>
+            <p><strong>Total revenue (all manufacturers):</strong> <span th:text="${#numbers.formatDecimal(totalRevenue, 1, 2) + ' грн'}"></span></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

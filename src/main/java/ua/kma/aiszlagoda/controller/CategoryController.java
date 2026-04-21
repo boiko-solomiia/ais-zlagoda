@@ -4,21 +4,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ua.kma.aiszlagoda.persistence.model.Category;
-import ua.kma.aiszlagoda.persistence.model.Employee;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.service.CategoryService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ua.kma.aiszlagoda.persistence.service.SaleService;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/category")
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final SaleService saleService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, SaleService saleService) {
+
         this.categoryService = categoryService;
+        this.saleService = saleService;
     }
 
     @GetMapping("/")
@@ -44,7 +48,6 @@ public class CategoryController {
         model.addAttribute("category", new Category());
         return "category-add";
     }
-
 
 
     @PostMapping("/add")
@@ -111,6 +114,37 @@ public class CategoryController {
         model.addAttribute("categories", response.getObject());
         model.addAttribute("searchName", name);
         return "category-list";
+    }
+
+    @GetMapping("/stats/{categoryNumber}")
+    public String showCategoryStats(@PathVariable int categoryNumber, Model model) {
+        Response<Category> categoryResponse = categoryService.findCategoryById(categoryNumber);
+        if (!categoryResponse.getErrors().isEmpty() || categoryResponse.getObject() == null) {
+            model.addAttribute("errors", categoryResponse.getErrors());
+            return "error-page";
+        }
+
+        Response<List<Map<String, Object>>> statsResponse = saleService.getSalesStatsByManufacturerForCategory(categoryNumber);
+        if (!statsResponse.getErrors().isEmpty()) {
+            model.addAttribute("errors", statsResponse.getErrors());
+            return "error-page";
+        }
+
+        List<Map<String, Object>> stats = statsResponse.getObject();
+        int totalUnits = 0;
+        double totalRevenue = 0;
+        for (Map<String, Object> stat : stats) {
+            totalUnits += ((Number) stat.get("totalUnitsSold")).intValue();
+            totalRevenue += ((Number) stat.get("totalSales")).doubleValue();
+        }
+
+        model.addAttribute("category", categoryResponse.getObject());
+        model.addAttribute("stats", stats);
+        model.addAttribute("totalManufacturers", stats.size());
+        model.addAttribute("totalUnits", totalUnits);
+        model.addAttribute("totalRevenue", totalRevenue);
+
+        return "category-stats";
     }
 
     @GetMapping("/print")
