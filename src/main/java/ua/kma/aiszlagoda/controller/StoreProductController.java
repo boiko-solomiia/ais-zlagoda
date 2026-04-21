@@ -7,6 +7,7 @@ import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
 import ua.kma.aiszlagoda.persistence.service.StoreProductService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -24,6 +25,7 @@ public class StoreProductController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String getAllStoreProducts(Model model) {
         Response<List<StoreProductInfo>> response = storeProductService.findAllStoreProductsSortedByName();
 
@@ -37,6 +39,7 @@ public class StoreProductController {
     }
 
     @GetMapping("/add")
+    @PreAuthorize("hasRole('MANAGER')")
     public String showAddForm(Model model) {
         Response<List<Product>> productsResponse = productService.findAll();
 
@@ -47,6 +50,7 @@ public class StoreProductController {
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('MANAGER')")
     public String addStoreProduct(@ModelAttribute StoreProduct storeProduct, Model model) throws SQLException {
         Response<StoreProduct> response = storeProductService.createStoreProduct(storeProduct);
 
@@ -62,6 +66,7 @@ public class StoreProductController {
     }
 
     @GetMapping("/edit/{upc}")
+    @PreAuthorize("hasRole('MANAGER')")
     public String showEditForm(@PathVariable String upc, Model model) {
         Response<StoreProduct> response = storeProductService.findStoreProductByUPC(upc);
         Response<List<Product>> productsResponse = productService.findAll();
@@ -77,6 +82,7 @@ public class StoreProductController {
     }
 
     @PostMapping("/edit")
+    @PreAuthorize("hasRole('MANAGER')")
     public String editStoreProduct(@ModelAttribute StoreProduct storeProduct, Model model) {
         Response<StoreProduct> response = storeProductService.updateStoreProduct(storeProduct);
 
@@ -92,6 +98,7 @@ public class StoreProductController {
     }
 
     @PostMapping("/delete/{upc}")
+    @PreAuthorize("hasRole('MANAGER')")
     public String deleteStoreProduct(@PathVariable String upc, RedirectAttributes redirectAttributes) {
         Response<StoreProduct> response = storeProductService.deleteStoreProduct(upc);
 
@@ -105,6 +112,7 @@ public class StoreProductController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String findByUpc(@RequestParam String upc, Model model) {
         Response<StoreProductInfo> response = storeProductService.findStoreProductInfoByUPC(upc);
 
@@ -119,6 +127,7 @@ public class StoreProductController {
     }
 
     @GetMapping("/promotional")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String getPromotionalProducts(Model model) {
         Response<List<StoreProductInfo>> response = storeProductService.findPromotionalProductsSortedByName();
 
@@ -132,6 +141,7 @@ public class StoreProductController {
     }
 
     @GetMapping("/non-promotional")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String getNonPromotionalProducts(Model model) {
         Response<List<StoreProductInfo>> response = storeProductService.findNonPromotionalProductsSortedByName();
 
@@ -145,6 +155,7 @@ public class StoreProductController {
     }
 
     @GetMapping("/sort")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String getStoreProductsSorted(
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(required = false) String filter,
@@ -189,6 +200,7 @@ public class StoreProductController {
     }
 
     @GetMapping("/print")
+    @PreAuthorize("hasRole('MANAGER')")
     public String printStoreProducts(Model model) {
         Response<List<StoreProductPrintDTO>> response = storeProductService.findAllForPrint();
         if (!response.getErrors().isEmpty()) {

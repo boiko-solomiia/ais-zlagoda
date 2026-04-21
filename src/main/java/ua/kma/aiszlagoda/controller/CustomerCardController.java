@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ua.kma.aiszlagoda.persistence.model.CustomerCard;
-import ua.kma.aiszlagoda.persistence.model.Employee;
 import ua.kma.aiszlagoda.persistence.model.Response;
 import ua.kma.aiszlagoda.persistence.service.CustomerCardService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -22,6 +22,7 @@ public class CustomerCardController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String getAllCustomerCards(Model model) {
         Response<List<CustomerCard>> response = customerCardService.findAll();
 
@@ -35,12 +36,14 @@ public class CustomerCardController {
     }
 
     @GetMapping("/add")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String showAddForm(Model model) {
         model.addAttribute("customerCard", new CustomerCard());
         return "customer-card-add";
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String addCustomerCard(@ModelAttribute CustomerCard customerCard, Model model) {
         Response<CustomerCard> response = customerCardService.createCustomerCard(customerCard);
 
@@ -54,6 +57,7 @@ public class CustomerCardController {
     }
 
     @GetMapping("/edit/{cardNumber}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String showEditForm(@PathVariable String cardNumber, Model model) {
         Response<CustomerCard> response = customerCardService.findCustomerCardByNumber(cardNumber);
 
@@ -67,6 +71,7 @@ public class CustomerCardController {
     }
 
     @PostMapping("/edit")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String editCustomerCard(@ModelAttribute CustomerCard customerCard, Model model) {
         Response<CustomerCard> response = customerCardService.updateCustomerCard(customerCard);
 
@@ -80,6 +85,7 @@ public class CustomerCardController {
     }
 
     @PostMapping("/delete/{cardNumber}")
+    @PreAuthorize("hasRole('MANAGER')")
     public String deleteCustomerCard(@PathVariable String cardNumber, RedirectAttributes redirectAttributes) {
         Response<CustomerCard> response = customerCardService.deleteCustomerCard(cardNumber);
 
@@ -93,6 +99,7 @@ public class CustomerCardController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String searchCustomerCardsBySurname(@RequestParam String surname, Model model) {
         Response<List<CustomerCard>> response = customerCardService.findCustomerCardsBySurname(surname);
 
@@ -107,6 +114,7 @@ public class CustomerCardController {
     }
 
     @GetMapping("/filter")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String filterByPercent(@RequestParam(required = false) Integer percent, Model model) {
         Response<List<CustomerCard>> response = percent != null
                 ? customerCardService.findCustomerCardsByPercent(percent)
@@ -123,6 +131,7 @@ public class CustomerCardController {
     }
 
     @GetMapping("/print")
+    @PreAuthorize("hasRole('MANAGER')")
     public String printCustomerCards(Model model) {
         Response<List<CustomerCard>> response = customerCardService.findAll();
         if (!response.getErrors().isEmpty()) {

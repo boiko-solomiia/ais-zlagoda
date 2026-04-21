@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +15,8 @@
         <a href="/">Home</a>
         <a href="/product">Products</a>
         <a href="/store-product">Store Products</a>
-        <a href="/category">Categories</a>
-        <a href="/employee">Employees</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/category">Categories</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/employee">Employees</a>
         <a href="/customer-card">Customer Cards</a>
         <a href="/check" class="active">Checks</a>
     </div>
@@ -42,17 +44,14 @@
             </div>
 
             <div class="form-field">
-                <label class="form-label">Employee (cashier only)</label>
-                <div class="select-wrapper">
-                    <select th:field="*{idEmployee}" class="category-select form-control" required>
-                        <option value="">Select cashier</option>
-                        <option th:each="emp : ${employees}"
-                                th:value="${emp.idEmployee}"
-                                th:text="${emp.emplSurname + ' ' + emp.emplName + ' (' + emp.idEmployee + ')'}">
-                        </option>
-                    </select>
-                    <span class="select-arrow">&#8964;</span>
-                </div>
+                <label class="form-label">Cashier</label>
+
+                <input type="hidden" th:field="*{idEmployee}"/>
+
+                <input type="text"
+                       class="form-control form-control-readonly"
+                       th:value="${employees != null and !#lists.isEmpty(employees) ? employees[0].emplSurname + ' ' + employees[0].emplName + ' (' + employees[0].idEmployee + ')' : ''}"
+                       readonly>
             </div>
 
             <div class="form-field">
