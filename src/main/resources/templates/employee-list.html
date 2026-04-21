@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +14,8 @@
         <a href="/">Home</a>
         <a href="/product">Products</a>
         <a href="/store-product">Store Products</a>
-        <a href="/category">Categories</a>
-        <a href="/employee" class="active">Employees</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/category">Categories</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/employee" class="active">Employees</a>
         <a href="/customer-card">Customer Cards</a>
         <a href="/check">Checks</a>
     </div>

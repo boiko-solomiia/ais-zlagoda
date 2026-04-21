@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +14,8 @@
         <a href="/">Home</a>
         <a href="/product">Products</a>
         <a href="/store-product" class="active">Store Products</a>
-        <a href="/category">Categories</a>
-        <a href="/employee">Employees</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/category">Categories</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/employee">Employees</a>
         <a href="/customer-card">Customer Cards</a>
         <a href="/check">Checks</a>
     </div>
@@ -54,7 +56,14 @@
                class="btn btn-sort">
                 Sort by name ↑
             </a>
-            <a th:unless="${currentSort == 'quantity'}"
+            <a sec:authorize="hasRole('MANAGER')"
+               th:unless="${currentSort == 'quantity'}"
+               th:href="@{/store-product/sort(sortBy='quantity', filter=${filterType})}"
+               class="btn btn-sort">
+                Sort by quantity ↑
+            </a>
+            <a sec:authorize="hasRole('CASHIER')"
+               th:if="${currentSort != 'quantity' and filterType != null}"
                th:href="@{/store-product/sort(sortBy='quantity', filter=${filterType})}"
                class="btn btn-sort">
                 Sort by quantity ↑
@@ -69,8 +78,8 @@
         </div>
 
         <div class="action-right">
-            <a th:href="@{/store-product/add}" class="btn btn-primary">Add store product</a>
-            <a th:href="@{/store-product/print}" class="btn btn-sort">Print Report</a>
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/store-product/add}" class="btn btn-primary">Add store product</a>
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/store-product/print}" class="btn btn-sort">Print Report</a>
         </div>
     </div>
 
@@ -88,7 +97,7 @@
 
     <div th:if="${storeProducts == null or #lists.isEmpty(storeProducts)}" class="empty-state">
         <p>No store products found.</p>
-        <a th:href="@{/store-product/add}" class="btn btn-primary">Add store product</a>
+        <a sec:authorize="hasRole('MANAGER')" th:href="@{/store-product/add}" class="btn btn-primary">Add store product</a>
     </div>
 
     <div th:unless="${storeProducts == null or #lists.isEmpty(storeProducts)}" class="table-container">
@@ -110,7 +119,7 @@
                 <td th:text="${storeProduct.characteristics}"></td>
                 <td th:text="${storeProduct.sellingPrice}"></td>
                 <td th:text="${storeProduct.productsNumber}"></td>
-                <td class="actions">
+                <td class="actions" sec:authorize="hasRole('MANAGER')">
                     <a th:href="@{/store-product/edit/{upc}(upc=${storeProduct.upc})}" class="btn-edit">Edit</a>
                     <form th:action="@{/store-product/delete/{upc}(upc=${storeProduct.upc})}" method="post" class="inline-form">
                         <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>

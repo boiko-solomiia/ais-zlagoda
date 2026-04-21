@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +14,8 @@
         <a href="/">Home</a>
         <a href="/product">Products</a>
         <a href="/store-product">Store Products</a>
-        <a href="/category">Categories</a>
-        <a href="/employee">Employees</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/category">Categories</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/employee">Employees</a>
         <a href="/customer-card" class="active">Customer Cards</a>
         <a href="/check">Checks</a>
     </div>
@@ -61,8 +63,12 @@
         </div>
 
         <div class="action-right">
-            <a th:href="@{/customer-card/add}" class="btn btn-primary">Add customer card</a>
-            <a th:href="@{/customer-card/print}" class="btn btn-sort">Print Report</a>
+            <a sec:authorize="hasAnyRole('MANAGER', 'CASHIER')"
+               th:href="@{/customer-card/add}"
+               class="btn btn-primary">Add customer card</a>
+            <a sec:authorize="hasRole('MANAGER')"
+               th:href="@{/customer-card/print}"
+               class="btn btn-sort">Print Report</a>
         </div>
     </div>
 
@@ -87,7 +93,9 @@
 
     <div th:if="${customerCards == null or #lists.isEmpty(customerCards)}" class="empty-state">
         <p>No customer cards found.</p>
-        <a th:href="@{/customer-card/add}" class="btn btn-primary">Add customer card</a>
+        <a sec:authorize="hasAnyRole('MANAGER', 'CASHIER')"
+           th:href="@{/customer-card/add}"
+           class="btn btn-primary">Add customer card</a>
     </div>
 
     <div th:unless="${customerCards == null or #lists.isEmpty(customerCards)}" class="table-container">
@@ -98,7 +106,6 @@
                 <th>Full name</th>
                 <th>Phone number</th>
                 <th>Discount</th>
-                <th>Phone Number</th>
                 <th>City</th>
                 <th>Street</th>
                 <th>Zip Code</th>
@@ -111,13 +118,15 @@
                 <td th:text="${card.custSurname + ' ' + card.custName + ' ' + (card.custPatronymic != null ? card.custPatronymic : '')}"></td>
                 <td th:text="${card.phoneNumber}"></td>
                 <td th:text="${card.percent + '%'}"></td>
-                <td th:text="${card.phoneNumber}"></td>
                 <td th:text="${card.city}"></td>
                 <td th:text="${card.street}"></td>
                 <td th:text="${card.zipCode}"></td>
                 <td class="actions">
                     <a th:href="@{/customer-card/edit/{cardNumber}(cardNumber=${card.cardNumber})}" class="btn-edit">Edit</a>
-                    <form th:action="@{/customer-card/delete/{cardNumber}(cardNumber=${card.cardNumber})}" method="post" class="inline-form">
+                    <form sec:authorize="hasRole('MANAGER')"
+                          th:action="@{/customer-card/delete/{cardNumber}(cardNumber=${card.cardNumber})}"
+                          method="post"
+                          class="inline-form">
                         <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
                     </form>
                 </td>

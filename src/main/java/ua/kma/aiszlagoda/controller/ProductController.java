@@ -8,9 +8,11 @@ import ua.kma.aiszlagoda.persistence.model.*;
 import ua.kma.aiszlagoda.persistence.service.CategoryService;
 import ua.kma.aiszlagoda.persistence.service.ProductService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Controller
 @RequestMapping("/product")
@@ -25,6 +27,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String getAllProducts(Model model) {
         Response<List<Product>> response = productService.findAll();
 
@@ -40,6 +43,7 @@ public class ProductController {
     }
 
     @GetMapping("/add")
+    @PreAuthorize("hasRole('MANAGER')")
     public String showAddForm(Model model) {
         Response<List<Category>> categoriesResponse = categoryService.findAll();
         model.addAttribute("product", new Product());
@@ -48,6 +52,7 @@ public class ProductController {
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('MANAGER')")
     public String addProduct(@ModelAttribute Product product, Model model) {
         Response<Product> response = productService.createProduct(product);
 
@@ -63,6 +68,7 @@ public class ProductController {
     }
 
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public String showEditForm(@PathVariable int id, Model model) {
         Response<Product> response = productService.findProductById(id);
         Response<List<Category>> categoriesResponse = categoryService.findAll();
@@ -78,6 +84,7 @@ public class ProductController {
     }
 
     @PostMapping("/edit")
+    @PreAuthorize("hasRole('MANAGER')")
     public String editProduct(@ModelAttribute Product product, Model model) {
         Response<Product> response = productService.updateProduct(product);
 
@@ -93,6 +100,7 @@ public class ProductController {
     }
 
     @PostMapping("/delete/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public String deleteProduct(@PathVariable int id, RedirectAttributes redirectAttributes) {
         Response<Product> response = productService.deleteProduct(id);
 
@@ -106,6 +114,7 @@ public class ProductController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String searchProductsByName(@RequestParam String name, Model model) {
         Response<List<Product>> response = productService.findProductsByName(name);
 
@@ -122,6 +131,7 @@ public class ProductController {
     }
 
     @GetMapping("/filter")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String getProductsByCategory(@RequestParam(required = false) Integer categoryNumber, Model model) {
         Response<List<Product>> response = categoryNumber != null
                 ? productService.findProductsByCategory(categoryNumber)
@@ -140,6 +150,7 @@ public class ProductController {
     }
 
     @GetMapping("/print")
+    @PreAuthorize("hasRole('MANAGER')")
     public String printProducts(Model model) {
         Response<List<Product>> response = productService.findAll();
         if (!response.getErrors().isEmpty()) {
@@ -152,6 +163,7 @@ public class ProductController {
 
 
     @GetMapping("/sold-quantity")
+    @PreAuthorize("hasRole('MANAGER')")
     public String showProductSalesPage(@RequestParam Integer productId, Model model) {
         Response<Product> productResponse = productService.findProductById(productId);
         if (!productResponse.getErrors().isEmpty()) {
@@ -178,6 +190,7 @@ public class ProductController {
     }
 
     @PostMapping("/sold-quantity")
+    @PreAuthorize("hasRole('MANAGER')")
     public String filterProductSalesByPeriod(
             @RequestParam Integer productId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime start,

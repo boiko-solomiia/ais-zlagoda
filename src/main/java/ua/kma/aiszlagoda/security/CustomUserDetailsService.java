@@ -27,10 +27,16 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
 
+        String role = switch (authUser.getRole().toLowerCase()) {
+            case "manager", "менеджер" -> "MANAGER";
+            case "cashier", "касир" -> "CASHIER";
+            default -> throw new UsernameNotFoundException("Unknown role: " + authUser.getRole());
+        };
+
         return User.builder()
                 .username(authUser.getUsername())
                 .password(authUser.getPasswordHash())
-                .roles(authUser.getRole())
+                .roles(role)
                 .build();
     }
 }

@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +14,8 @@
         <a href="/">Home</a>
         <a href="/product" class="active">Products</a>
         <a href="/store-product">Store Products</a>
-        <a href="/category">Categories</a>
-        <a href="/employee">Employees</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/category">Categories</a>
+        <a sec:authorize="hasRole('MANAGER')" href="/employee">Employees</a>
         <a href="/customer-card">Customer Cards</a>
         <a href="/check">Checks</a>
     </div>
@@ -64,8 +66,8 @@
         </div>
 
         <div class="action-right">
-            <a th:href="@{/product/add}" class="btn btn-primary">Add product</a>
-            <a th:href="@{/product/print}" class="btn btn-sort">Print Report</a>
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/add}" class="btn btn-primary">Add product</a>
+            <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/print}" class="btn btn-sort">Print Report</a>
         </div>
     </div>
 
@@ -91,7 +93,7 @@
 
     <div th:if="${products != null and #lists.isEmpty(products)}" class="empty-state">
         <p>No products found.</p>
-        <a th:href="@{/product/add}" class="btn btn-primary">Add product</a>
+        <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/add}" class="btn btn-primary">Add product</a>
     </div>
 
     <div th:unless="${products == null or #lists.isEmpty(products)}" class="table-container">
@@ -113,10 +115,10 @@
                 <td th:text="${product.manufacturer}"></td>
                 <td th:text="${product.characteristics}"></td>
                 <td th:text="${product.categoryNumber}"></td>
-                <td class="actions">
-                    <a th:href="@{/product/sold-quantity(productId=${product.productId})}" class="btn-sales">Sales</a>
-                    <a th:href="@{/product/edit/{id}(id=${product.productId})}" class="btn-edit">Edit</a>
-                    <form th:action="@{/product/delete/{id}(id=${product.productId})}" method="post"
+                <td sec:authorize="hasRole('MANAGER')" class="actions">
+                    <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/sold-quantity(productId=${product.productId})}" class="btn-sales">Sales</a>
+                    <a sec:authorize="hasRole('MANAGER')" th:href="@{/product/edit/{id}(id=${product.productId})}" class="btn-edit">Edit</a>
+                    <form sec:authorize="hasRole('MANAGER')" th:action="@{/product/delete/{id}(id=${product.productId})}" method="post"
                           class="inline-form">
                         <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete
                         </button>
