@@ -31,8 +31,7 @@
 
 <div class="main-content">
     <div class="page-header">
-        <h1>Sales Statistics: <span th:text="${category.categoryName}"></span></h1>
-        <p>Category #<span th:text="${category.categoryNumber}"></span></p>
+        <h1>Sales Statistics: <span th:text="${category.categoryName + ' (' + category.categoryNumber + ')'}"></span></h1>
     </div>
 
     <div class="action-bar">
