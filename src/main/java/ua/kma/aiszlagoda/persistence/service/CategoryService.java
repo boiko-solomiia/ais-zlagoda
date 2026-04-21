@@ -159,4 +159,42 @@ public class CategoryService {
             return true;
         }
     }
+
+    public Response<List<Category>> findCategoriesWhereAllProductsWereSold() {
+        List<Category> result = new LinkedList<>();
+        String query = """
+                SELECT cat.category_number, cat.category_name
+                FROM category cat
+                WHERE NOT EXISTS (
+                    SELECT p.product_id
+                    FROM product p
+                    WHERE p.category_number = cat.category_number
+                      AND NOT EXISTS (
+                          SELECT *
+                          FROM store_product sp
+                          JOIN sale s ON sp.upc = s.upc
+                          WHERE sp.product_id = p.product_id
+                      )
+                )
+                AND EXISTS (
+                    SELECT *
+                    FROM product p
+                    WHERE p.category_number = cat.category_number
+                )
+                ORDER BY cat.category_name
+                """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            ResultSet resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                result.add(new Category(
+                        resultSet.getInt("category_number"),
+                        resultSet.getString("category_name")
+                ));
+            }
+            return new Response<>(result, new LinkedList<>());
+        } catch (SQLException e) {
+            return new Response<>(null, Collections.singletonList(e.getMessage()));
+        }
+    }
 }

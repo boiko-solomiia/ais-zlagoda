@@ -157,4 +157,16 @@ public class CategoryController {
         model.addAttribute("categories", response.getObject());
         return "category-print";
     }
+
+    @GetMapping("/fully-sold")
+    public String getFullySoldCategories(Model model) {
+        Response<List<Category>> response = categoryService.findCategoriesWhereAllProductsWereSold();
+        if (!response.getErrors().isEmpty()) {
+            model.addAttribute("errors", response.getErrors());
+            return "error-page";
+        }
+        model.addAttribute("categories", response.getObject());
+        model.addAttribute("filterType", "fully-sold");
+        return "category-list";
+    }
 }
